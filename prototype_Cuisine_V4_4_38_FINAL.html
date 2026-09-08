@@ -1,0 +1,1890 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cuisine V4.4.38 — profil &amp; logement</title>
+<style>
+body{margin:0;background:#f4f6f8;color:#17202a;font-family:Arial,sans-serif}.app{max-width:960px;margin:auto;padding:24px}.card{background:#fff;border-radius:20px;padding:30px;box-shadow:0 5px 25px #0001}
+h1{margin:0 0 6px}h2{margin:0 0 10px}.muted{color:#66717d;line-height:1.5}.progress{height:8px;background:#e7ebef;border-radius:8px;margin:22px 0 28px}.bar{height:100%;background:#315efb;border-radius:8px}
+.screen{display:none}.screen.active{display:block}.options{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin:18px 0}.opt{padding:14px;border:1px solid #dce1e7;border-radius:12px;cursor:pointer}.opt.selected{background:#edf2ff;border-color:#315efb}
+.box{background:#f7f8fa;border-radius:13px;padding:15px;margin:12px 0}.field{margin:18px 0}.field label{font-weight:600;display:block;margin-bottom:8px}.input,.select{width:100%;padding:12px;border:1px solid #dce1e7;border-radius:10px;box-sizing:border-box}.actions{display:flex;justify-content:flex-end;gap:10px;margin-top:25px}button{border:0;border-radius:11px;padding:12px 19px;background:#315efb;color:white;font-weight:bold;cursor:pointer}.tag{display:inline-block;background:#eef1f5;border-radius:18px;padding:6px 10px;margin:3px}.small{font-size:13px;color:#66717d}
+
+/* --- V4.1 caméra corrigée --- */
+.camera-help{
+  margin-top:14px;padding:14px;border-radius:14px;
+  background:#f6f7f9;border:1px solid #e2e5e9;font-size:14px;line-height:1.45;
+}
+.camera-status{
+  margin-top:10px;padding:10px 12px;border-radius:10px;
+  font-size:14px;background:#f6f7f9;border:1px solid #e2e5e9;
+}
+.camera-status.ok{background:#eef8f1;border-color:#b9dfc2}
+.camera-status.warn{background:#fff8e8;border-color:#ead49a}
+.camera-status.err{background:#fff0f0;border-color:#e1b2b2}
+.camera-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.camera-actions button{cursor:pointer}
+.camera-preview{
+  width:100%;max-height:360px;object-fit:cover;border-radius:16px;
+  background:#111;display:block;
+}
+.camera-checklist{
+  margin:12px 0 0;padding-left:20px;font-size:13px;line-height:1.55;
+}
+.camera-badge{
+  display:inline-block;padding:5px 9px;border-radius:999px;
+  background:#eef1f5;font-size:12px;margin:4px 4px 0 0;
+}
+
+
+/* ===== iPhone / Safari camera mode ===== */
+html, body { -webkit-text-size-adjust:100%; }
+button, input, select, textarea { font-size:16px; }
+video { -webkit-transform:translateZ(0); transform:translateZ(0); }
+#iphoneCameraGuide{
+  display:none; position:fixed; inset:0; z-index:20000;
+  background:rgba(15,18,22,.82); padding:18px;
+  align-items:center; justify-content:center;
+}
+#iphoneCameraGuide .box{
+  width:min(620px,100%); background:#fff; border-radius:22px;
+  padding:22px; max-height:90vh; overflow:auto;
+  box-shadow:0 15px 60px rgba(0,0,0,.35);
+}
+#iphoneCameraGuide h2{margin-top:0}
+#iphoneCameraGuide .step{
+  padding:10px 12px; background:#f5f6f8; border-radius:12px;
+  margin:8px 0; line-height:1.4;
+}
+#iphoneCameraGuide .primary{
+  width:100%; padding:14px 18px; border:0; border-radius:14px;
+  font-weight:700; background:#111; color:#fff; margin-top:12px;
+}
+#iosCameraButton{
+  display:none; position:fixed; left:16px; right:16px; bottom:16px;
+  z-index:19999; padding:15px; border:0; border-radius:15px;
+  font-size:17px; font-weight:700;
+}
+@media (max-width:700px){
+  #cameraReliabilityPanel{
+    left:8px !important; right:8px !important; bottom:8px !important;
+    transform:none !important; width:auto !important;
+    max-height:92vh; overflow:auto;
+  }
+  #cameraReliabilityPanel .camera-preview{max-height:42vh}
+}
+
+.button{display:inline-block;padding:12px 18px;border:0;border-radius:10px;background:#111827;color:#fff;text-decoration:none;font:inherit;cursor:pointer}
+.screen:target{display:block}
+
+<style>
+.info-card,.result-card,.recommendation,.plan-row,.analysis-step{margin:14px 0;padding:16px;border:1px solid #e5e7eb;border-radius:14px;background:#fff}
+.video-placeholder{height:220px;border:2px dashed #cbd5e1;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;margin:18px 0;background:#f8fafc}.play{font-size:34px}
+.target-list{display:grid;gap:10px;margin:18px 0}.target{padding:12px 14px;border-radius:10px;background:#f8fafc}
+.analysis-step{display:flex;gap:12px;align-items:flex-start}.analysis-step small{display:block;margin-top:4px;color:#64748b}
+.result-card{display:flex;gap:12px}.badge{font-size:20px}.rec-head{display:flex;justify-content:space-between;gap:12px;font-weight:600}.pill{font-size:12px;padding:4px 8px;border-radius:999px;background:#f1f5f9;white-space:nowrap}.rec-meta{font-size:13px;color:#64748b}
+.plan-row{display:flex;gap:12px;align-items:center}.plan-number{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#eef2ff;font-weight:700}.plan-row div{flex:1}
+
+/* ===== V4.2 analysis presentation ===== */
+.analysis-grid{display:grid;gap:10px;margin:16px 0}
+.analysis-item{display:flex;gap:12px;align-items:flex-start;padding:14px;border:1px solid #e5e7eb;border-radius:14px;background:#fff}
+.analysis-item>span{font-weight:700;min-width:28px}
+.analysis-item small{display:block;margin-top:4px;color:#64748b}
+.score-card{margin:18px 0;padding:22px;border-radius:18px;background:#f8fafc;text-align:center;border:1px solid #e5e7eb}
+.score-label{font-size:14px;color:#64748b}
+.score-value{font-size:54px;font-weight:800;line-height:1.05;margin:8px 0}
+.score-value span{font-size:22px;font-weight:600;color:#64748b}
+.score-caption{font-size:13px;color:#64748b}
+
+
+/* V4.2.2 — minuteur d'enregistrement */
+.record-timer{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  margin:14px 0;
+  padding:12px 16px;
+  border-radius:14px;
+  background:#f1f3f5;
+  color:#14213d;
+  font-size:28px;
+  font-weight:800;
+  letter-spacing:.04em;
+  font-variant-numeric:tabular-nums;
+}
+.record-timer .timer-dot{
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  background:#9aa0a6;
+}
+.record-timer.recording{
+  background:#fff1f1;
+  color:#b42318;
+}
+.record-timer.recording .timer-dot{
+  background:#d92d20;
+  animation:recordPulse 1s infinite;
+}
+@keyframes recordPulse{
+  0%,100%{opacity:1;transform:scale(1)}
+  50%{opacity:.35;transform:scale(.75)}
+}
+.record-button-recording{
+  background:#b42318 !important;
+  color:#fff !important;
+}
+@media (prefers-reduced-motion: reduce){
+  .record-timer .timer-dot{animation:none}
+}
+
+.time-note{margin-top:18px;padding:16px;border-radius:14px;background:#f6f7f9}.time-note strong{display:block;margin-bottom:6px}
+
+.profile-step{display:none}
+.profile-step.active{display:block}
+.profile-step label{display:block;margin:16px 0;font-weight:600}
+.profile-step select,.profile-step textarea{
+  display:block;width:100%;box-sizing:border-box;margin-top:7px;padding:12px 14px;
+  border:1px solid #cfd4dc;border-radius:10px;background:#fff;font:inherit;
+}
+.profile-actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+.profile-actions button{min-width:140px}
+.profile-progress{text-align:center;margin-top:12px;color:#667085;font-size:.9rem}
+.profile-actions{display:flex !important;visibility:visible !important;opacity:1 !important}
+.profile-actions button{display:inline-block !important;visibility:visible !important}
+.eyebrow{font-size:.78rem;font-weight:800;letter-spacing:.08em;color:#667085;margin-bottom:8px}
+
+
+.check-group{border:0;padding:0;margin:16px 0}
+.check-group legend{font-weight:600;margin-bottom:9px}
+.required-mark{color:#667085;font-weight:400}
+.check-option{
+  display:flex !important;
+  align-items:center;
+  gap:10px;
+  margin:8px 0 !important;
+  padding:11px 13px;
+  border:1px solid #dce1e7;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:400 !important;
+}
+.check-option input{
+  width:20px;
+  height:20px;
+  flex:0 0 auto;
+  accent-color:#315efb;
+}
+.check-option:has(input:checked){
+  border-color:#315efb;
+  background:#edf2ff;
+}
+
+
+.frequency-group{border:0;padding:0;margin:16px 0}
+.frequency-group legend{font-weight:600;margin-bottom:10px}
+.frequency-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.frequency-grid label{display:block;font-weight:600;margin:0 !important}
+.frequency-grid input,.frequency-grid select{display:block;width:100%;box-sizing:border-box;margin-top:7px;padding:12px 14px;border:1px solid #cfd4dc;border-radius:10px;background:#fff;font:inherit}
+.field-help{color:#667085;font-size:.92rem;margin:10px 0}
+.weekly-volume{padding:12px 14px;border-radius:10px;background:#f6f7f9;font-weight:600}
+@media (max-width:700px){.frequency-grid{grid-template-columns:1fr}}
+
+
+.check-option-grid,.radio-option-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.radio-option{
+  display:flex;align-items:center;gap:10px;margin:0;padding:12px 13px;
+  border:1px solid #dce1e7;border-radius:10px;cursor:pointer;font-weight:400;
+}
+.radio-option input{width:19px;height:19px;flex:0 0 auto;accent-color:#315efb}
+.radio-option:has(input:checked){border-color:#315efb;background:#edf2ff}
+@media (max-width:700px){.check-option-grid,.radio-option-grid{grid-template-columns:1fr}}
+
+</style><style>
+.camera-status,.record-status{margin:12px 0;padding:10px 12px;border-radius:10px;background:#f1f5f9;font-size:14px}
+.camera-status.error{background:#fee2e2}
+.camera-box{position:relative;width:100%;max-width:760px;aspect-ratio:16/9;margin:16px auto;background:#111;border-radius:16px;overflow:hidden}
+.camera-box video{width:100%;height:100%;object-fit:cover}
+.camera-placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#cbd5e1;font-size:15px}
+.camera-box video:not([src=""])+.camera-placeholder{display:none}
+.video-review{display:none;margin:14px 0}.video-review.visible{display:block}.video-review video{width:100%;max-width:760px;border-radius:12px}
+.info-card,.analysis-step{margin:14px 0;padding:16px;border:1px solid #e5e7eb;border-radius:14px;background:#fff}
+.target-list{display:grid;gap:10px;margin:18px 0}.target{padding:12px 14px;border-radius:10px;background:#f8fafc}
+.analysis-step{display:flex;gap:12px;align-items:flex-start}.analysis-step small{display:block;margin-top:4px;color:#64748b}
+</style>
+<meta name="prototype-version" content="V4.4.38">
+</head>
+<body><div class="app"><div class="card">
+<h1>Cuisine V4.4.38 — profil & logement</h1>
+<p class="muted">Usage → cuisson & sécurité → difficulté → précision → gêne → priorité → vidéo → analyse → recommandation</p>
+<div class="progress"><div class="bar" id="bar"></div></div>
+
+<section class="screen" id="profileIntro">
+  <div class="card">
+    <div class="eyebrow">ÉTAPE 1 · MOI & MON LOGEMENT</div>
+    <h2>Avant de regarder votre logement</h2>
+    <p>Pour vous donner des recommandations utiles, nous avons d'abord besoin de comprendre <strong>qui vit dans ce logement, comment vous l'utilisez et combien de temps vous souhaitez y rester</strong>.</p>
+
+    <form id="profileForm">
+      <div class="profile-step active" data-step="1">
+        <h3>1. Votre profil</h3>
+        <label>Quelle est votre tranche d'âge ?
+          <select id="ageRange" required>
+            <option value="">Choisissez…</option>
+            <option>55–59 ans</option><option>60–64 ans</option><option>65–69 ans</option>
+            <option>70–74 ans</option><option>75–79 ans</option><option>80 ans ou plus</option>
+          </select>
+        </label>
+        <label>Comment vivez-vous actuellement ?
+          <select id="household" required>
+            <option value="">Choisissez…</option>
+            <option>Seul(e)</option><option>En couple</option><option>Avec d'autres membres de la famille</option><option>Autre situation</option>
+          </select>
+        </label>
+        <label>Comment évaluez-vous votre forme physique aujourd'hui ?
+          <select id="fitness" required>
+            <option value="">Choisissez…</option>
+            <option>Très bonne</option><option>Bonne</option><option>Moyenne</option><option>Variable</option><option>Je préfère ne pas répondre</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="profile-step" data-step="2">
+        <h3>2. Mobilité et quotidien</h3>
+        <fieldset class="frequency-group">
+          <legend>Rencontrez-vous actuellement une difficulté qui peut influencer l'utilisation de votre logement ? <span class="required-mark">*</span></legend>
+          <div class="radio-option-grid">
+            <label class="radio-option"><input type="radio" name="mobilityRegular" value="Non" required> <span>Non</span></label>
+            <label class="radio-option"><input type="radio" name="mobilityRegular" value="Oui"> <span>Oui</span></label>
+          </div>
+        </fieldset>
+
+        <div id="mobilityDetails" hidden>
+          <fieldset class="frequency-group check-group">
+            <legend>De quel(s) type(s) de difficulté s'agit-il ? <span class="required-mark">*</span></legend>
+            <div class="check-option-grid">
+              <label class="check-option"><input type="checkbox" name="mobilityType" value="Mobilité ou déplacements"> <span>Mobilité / déplacements</span></label>
+              <label class="check-option"><input type="checkbox" name="mobilityType" value="Équilibre ou stabilité"> <span>Équilibre / stabilité</span></label>
+              <label class="check-option"><input type="checkbox" name="mobilityType" value="Gestes, force ou préhension"> <span>Gestes / force / préhension</span></label>
+              <label class="check-option"><input type="checkbox" name="mobilityType" value="Vision ou perception"> <span>Vision / perception</span></label>
+              <label class="check-option"><input type="checkbox" name="mobilityType" value="Audition ou perception sonore"> <span>Audition / perception sonore</span></label>
+              <label class="check-option"><input type="checkbox" name="mobilityType" value="Fatigue ou endurance"> <span>Fatigue / endurance</span></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="frequency-group check-group">
+            <legend>Y a-t-il des mouvements ou situations que vous évitez déjà ? <span class="required-mark">*</span></legend>
+            <div class="check-option-grid">
+              <label class="check-option"><input type="checkbox" name="avoidedMovements" value="Les escaliers"> <span>Les escaliers</span></label>
+              <label class="check-option"><input type="checkbox" name="avoidedMovements" value="Se pencher ou s'accroupir"> <span>Se pencher / s'accroupir</span></label>
+              <label class="check-option"><input type="checkbox" name="avoidedMovements" value="Atteindre en hauteur"> <span>Atteindre en hauteur</span></label>
+              <label class="check-option"><input type="checkbox" name="avoidedMovements" value="Rester longtemps debout"> <span>Rester longtemps debout</span></label>
+              <label class="check-option"><input type="checkbox" name="avoidedMovements" value="Porter ou déplacer des objets"> <span>Porter / déplacer des objets</span></label>
+              <label class="check-option"><input type="checkbox" name="avoidedMovements" value="Certains efforts"> <span>Certains efforts</span></label>
+              <label class="check-option"><input type="checkbox" name="avoidedMovements" value="Aucune situation"> <span>Aucune situation</span></label>
+            </div>
+          </fieldset>
+        </div>
+
+</div>
+
+      <div class="profile-step" data-step="3">
+        <h3>3. Votre mode de vie</h3>
+        <fieldset class="frequency-group">
+          <legend>Pratiquez-vous actuellement une activité physique ou sportive de façon régulière ? <span class="required-mark">*</span></legend>
+          <div class="radio-option-grid">
+            <label class="radio-option"><input type="radio" name="sportRegular" value="Oui" required> <span>Oui</span></label>
+            <label class="radio-option"><input type="radio" name="sportRegular" value="Non"> <span>Non</span></label>
+          </div>
+        </fieldset>
+
+        <div id="sportDetails" hidden>
+          <fieldset class="frequency-group">
+            <legend>Quelle(s) activité(s) physique(s) ou sportive(s) pratiquez-vous ? <span class="required-mark">*</span></legend>
+            <div class="check-option-grid">
+              <label class="check-option"><input type="checkbox" name="sportType" value="Marche"> <span>🚶 Marche</span></label>
+              <label class="check-option"><input type="checkbox" name="sportType" value="Vélo"> <span>🚲 Vélo</span></label>
+              <label class="check-option"><input type="checkbox" name="sportType" value="Natation"> <span>🏊 Natation</span></label>
+              <label class="check-option"><input type="checkbox" name="sportType" value="Course"> <span>🏃 Course</span></label>
+              <label class="check-option"><input type="checkbox" name="sportType" value="Renforcement / gymnastique"> <span>Renforcement / gymnastique</span></label>
+              <label class="check-option"><input type="checkbox" name="sportType" value="Randonnée"> <span>🥾 Randonnée</span></label>
+              <label class="check-option"><input type="checkbox" name="sportType" value="Sport collectif / raquette"> <span>Sport collectif / raquette</span></label>
+              <label class="check-option"><input type="checkbox" name="sportType" value="Autre activité"> <span>Autre activité</span></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="frequency-group">
+            <legend>À quelle fréquence pratiquez-vous ces activités ? <span class="required-mark">*</span></legend>
+            <div class="frequency-grid">
+              <label>Nombre de séances par semaine
+                <input id="sportSessions" type="number" min="1" max="30" step="1" inputmode="numeric" placeholder="Ex. 3">
+              </label>
+              <label>Durée moyenne d'une séance
+                <select id="sportDuration"><option value="">Choisissez…</option>
+              <option>Moins de 30 min</option>
+              <option>30 min à 1 heure</option>
+              <option>Plus d'1 heure</option>
+              <option>Plus de 2 heures</option></select>
+              </label>
+            </div>
+            <p class="field-help">Nous remplaçons les notions vagues « régulièrement » ou « très régulièrement » par une fréquence et une durée concrètes.</p>
+            <div class="weekly-volume" id="sportWeeklyVolume" aria-live="polite">Volume hebdomadaire estimé : —</div>
+          </fieldset>
+        </div>
+
+        
+        <fieldset class="frequency-group">
+          <legend>Faites-vous régulièrement des déplacements à pied ou à vélo dans votre quotidien ? <span class="required-mark">*</span></legend>
+          <div class="radio-option-grid">
+            <label class="radio-option"><input type="radio" name="activeTravel" value="Non" required> <span>Non</span></label>
+            <label class="radio-option"><input type="radio" name="activeTravel" value="Oui"> <span>Oui</span></label>
+          </div>
+        </fieldset>
+
+        <div id="activeTravelDetails" hidden>
+          <fieldset class="frequency-group check-group">
+            <legend>Comment se font ces déplacements ? <span class="required-mark">*</span></legend>
+            <div class="check-option-grid">
+              <label class="check-option"><input type="checkbox" name="outsideMode" value="À pied"> <span>🚶 À pied</span></label>
+              <label class="check-option"><input type="checkbox" name="outsideMode" value="À vélo"> <span>🚲 À vélo</span></label>
+            </div>
+          </fieldset>
+          <fieldset class="frequency-group">
+            <legend>En moyenne, combien de temps par jour ? <span class="required-mark">*</span></legend>
+            <div class="radio-option-grid">
+              <label class="radio-option"><input type="radio" name="outsideDuration" value="Moins de 30 minutes"> <span>Moins de 30 min</span></label>
+              <label class="radio-option"><input type="radio" name="outsideDuration" value="30 min à 1 heure"> <span>30 min à 1 heure</span></label>
+              <label class="radio-option"><input type="radio" name="outsideDuration" value="Plus d'1 heure"> <span>Plus d'1 heure</span></label>
+              <label class="radio-option"><input type="radio" name="outsideDuration" value="Plus de 2 heures"> <span>Plus de 2 heures</span></label>
+            </div>
+          </fieldset>
+        </div>
+        <label>Qu'aimeriez-vous absolument continuer à pouvoir faire chez vous ?
+          <textarea id="futureActivities" rows="4" placeholder="Ex. cuisiner, recevoir des amis, jardiner, bricoler, monter à l'étage…"></textarea>
+        </label>
+      </div>
+
+      <div class="profile-step" data-step="4">
+        <h3>4. Votre perception du logement</h3>
+        <label>Comment vous sentez-vous dans votre logement aujourd'hui ?
+          <select id="homeFeeling" required>
+            <option value="">Choisissez…</option>
+            <option>Très à l'aise</option><option>À l'aise</option><option>Correctement à l'aise</option><option>Parfois contraint(e)</option><option>Souvent contraint(e)</option>
+          </select>
+        </label>
+        <fieldset class="frequency-group">
+          <legend>Y a-t-il déjà un endroit de votre logement que vous trouvez moins pratique ? <span class="required-mark">*</span></legend>
+          <div class="radio-option-grid">
+            <label class="radio-option"><input type="radio" name="problemAreaExists" value="Non" required> <span>Non</span></label>
+            <label class="radio-option"><input type="radio" name="problemAreaExists" value="Oui"> <span>Oui</span></label>
+          </div>
+        </fieldset>
+        <div id="problemAreaDetails" hidden>
+          <fieldset class="frequency-group check-group">
+            <legend>Le ou lesquels ? <span class="required-mark">*</span></legend>
+            <div class="check-option-grid">
+              <label class="check-option"><input type="checkbox" name="problemArea" value="Cuisine"> <span>Cuisine</span></label>
+              <label class="check-option"><input type="checkbox" name="problemArea" value="Salon / séjour"> <span>Salon / séjour</span></label>
+              <label class="check-option"><input type="checkbox" name="problemArea" value="Salle de bains"> <span>Salle de bains</span></label>
+              <label class="check-option"><input type="checkbox" name="problemArea" value="WC"> <span>WC</span></label>
+              <label class="check-option"><input type="checkbox" name="problemArea" value="Chambre"> <span>Chambre</span></label>
+              <label class="check-option"><input type="checkbox" name="problemArea" value="Escaliers / circulation"> <span>Escaliers / circulation</span></label>
+              <label class="check-option"><input type="checkbox" name="problemArea" value="Extérieur"> <span>Extérieur</span></label>
+            </div>
+          </fieldset>
+        </div>
+        <label>Y a-t-il une situation que vous aimeriez rendre plus facile ?
+          <textarea id="desiredImprovement" rows="3" placeholder="Décrivez-la librement…"></textarea>
+        </label>
+      </div>
+
+      <div class="profile-step" data-step="5">
+        <h3>5. Les caractéristiques du logement</h3>
+        <label>Votre logement est :
+          <select id="homeType" required>
+            <option value="">Choisissez…</option><option>Appartement</option><option>Maison</option><option>Autre</option>
+          </select>
+        </label>
+
+        <label>Quelle est la surface approximative de votre logement ?
+          <select id="homeSurface" required>
+            <option value="">Choisissez…</option>
+            <option>Moins de 50 m²</option>
+            <option>50 à 79 m²</option>
+            <option>80 à 99 m²</option>
+            <option>100 à 149 m²</option>
+            <option>150 m² ou plus</option>
+            <option>Je ne sais pas</option>
+          </select>
+        </label>
+
+        <label>Combien de pièces principales compte votre logement ?
+          <select id="roomCount" required>
+            <option value="">Choisissez…</option>
+            <option>1 pièce</option>
+            <option>2 pièces</option>
+            <option>3 pièces</option>
+            <option>4 pièces</option>
+            <option>5 pièces</option>
+            <option>6 pièces ou plus</option>
+          </select>
+        </label>
+
+        <label>Combien de chambres compte votre logement ?
+          <select id="bedroomCount" required>
+            <option value="">Choisissez…</option>
+            <option>Aucune</option>
+            <option>1 chambre</option>
+            <option>2 chambres</option>
+            <option>3 chambres</option>
+            <option>4 chambres ou plus</option>
+          </select>
+        </label>
+        <label>Combien de niveaux utilisez-vous au quotidien ?
+          <select id="levels" required>
+            <option value="">Choisissez…</option><option>Un seul niveau</option><option>Deux niveaux</option><option>Trois niveaux ou plus</option>
+          </select>
+        </label>
+        <div id="floorQuestion" hidden>
+          <label>À quel étage se situe votre appartement ?
+            <select id="floor">
+              <option value="">Choisissez…</option>
+              <option>Rez-de-chaussée</option>
+              <option>1er étage</option>
+              <option>2e étage</option>
+              <option>3e étage ou plus</option>
+            </select>
+          </label>
+        </div>
+        <div id="elevatorQuestion">
+          <label>Si vous habitez dans un appartement, y a-t-il un ascenseur vous permettant d'accéder à votre appartement ?
+          <select id="elevator">
+            <option value="">Choisissez…</option><option>Oui</option><option>Non</option>
+          </select>
+        </label>
+        </div>
+        <div id="stairsQuestion">
+          <label>Votre logement comporte-t-il des escaliers intérieurs ?
+            <select id="stairs">
+              <option value="">Choisissez…</option><option>Oui</option><option>Non</option>
+            </select>
+          </label>
+        </div>
+
+        <fieldset class="frequency-group check-group">
+          <legend>Comment ouvrez-vous principalement vos volets ? <span class="required-mark">*</span></legend>
+          <div class="check-option-grid">
+            <label class="check-option">
+              <input type="radio" name="shutterOpening" value="Volets roulants électriques" required>
+              <span>Volets roulants électriques</span>
+            </label>
+            <label class="check-option">
+              <input type="radio" name="shutterOpening" value="Volets roulants manuels à sangle ou cordon" required>
+              <span>Volets roulants manuels à sangle ou cordon</span>
+            </label>
+            <label class="check-option">
+              <input type="radio" name="shutterOpening" value="Volets roulants à manivelle" required>
+              <span>Volets roulants à manivelle</span>
+            </label>
+            <label class="check-option">
+              <input type="radio" name="shutterOpening" value="Volets battants" required>
+              <span>Volets battants</span>
+            </label>
+            <label class="check-option">
+              <input class="other-shutter-radio" type="radio" name="shutterOpening" value="Autre" required>
+              <span>Autre système</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset class="frequency-group check-group">
+          <legend>Cette ouverture vous demande-t-elle aujourd'hui un effort ou un mouvement gênant ?</legend>
+          <div class="check-option-grid">
+            <label class="check-option">
+              <input type="radio" name="shutterDifficulty" value="Non">
+              <span>Non</span>
+            </label>
+            <label class="check-option">
+              <input type="radio" name="shutterDifficulty" value="Oui">
+              <span>Oui</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset class="frequency-group check-group">
+          <legend>L'ouverture de vos fenêtres vous paraît-elle aujourd'hui facile ?</legend>
+          <div class="check-option-grid">
+            <label class="check-option">
+              <input type="radio" name="windowEase" value="Oui">
+              <span>Oui, sans difficulté</span>
+            </label>
+            <label class="check-option">
+              <input type="radio" name="windowEase" value="Parfois difficile">
+              <span>Parfois difficile</span>
+            </label>
+            <label class="check-option">
+              <input type="radio" name="windowEase" value="Souvent difficile">
+              <span>Souvent difficile</span>
+            </label>
+            <label class="check-option">
+              <input type="radio" name="windowEase" value="Je ne sais pas">
+              <span>Je ne sais pas / je ne les ouvre pas</span>
+            </label>
+          </div>
+        </fieldset>
+      
+        <fieldset class="frequency-group check-group">
+          <legend>Au cours des 3 dernières années, avez-vous eu un accident à votre domicile ? <span class="required-mark">*</span></legend>
+          <div class="check-option-grid">
+            <label class="check-option"><input type="radio" name="domesticAccident" value="Non" required> <span>Non</span></label>
+            <label class="check-option"><input type="radio" name="domesticAccident" value="Oui" required> <span>Oui</span></label>
+          </div>
+        </fieldset>
+
+        <div id="accidentDetails" hidden>
+          <fieldset class="frequency-group check-group">
+            <legend>De quel type d'accident s'agissait-il ? <span class="required-mark">*</span></legend>
+            <div class="check-option-grid">
+              <label class="check-option"><input type="checkbox" name="accidentType" value="Chute"> <span>Chute</span></label>
+              <label class="check-option"><input type="checkbox" name="accidentType" value="Brûlure"> <span>Brûlure</span></label>
+              <label class="check-option"><input type="checkbox" name="accidentType" value="Coup / choc"> <span>Coup / choc</span></label>
+              <label class="check-option"><input type="checkbox" name="accidentType" value="Coupure"> <span>Coupure</span></label>
+              <label class="check-option"><input type="checkbox" name="accidentType" value="Glissade"> <span>Glissade</span></label>
+              <label class="check-option"><input type="checkbox" name="accidentType" value="Autre"> <span>Autre accident</span></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="frequency-group check-group">
+            <legend>Dans quelle pièce ou quel espace ? <span class="required-mark">*</span></legend>
+            <div class="check-option-grid">
+              <label class="check-option"><input type="checkbox" name="accidentRoom" value="Cuisine"> <span>Cuisine</span></label>
+              <label class="check-option"><input type="checkbox" name="accidentRoom" value="Salon / séjour"> <span>Salon / séjour</span></label>
+              <label class="check-option"><input type="checkbox" name="accidentRoom" value="Salle de bains"> <span>Salle de bains</span></label>
+              <label class="check-option"><input type="checkbox" name="accidentRoom" value="WC"> <span>WC</span></label>
+              <label class="check-option"><input type="checkbox" name="accidentRoom" value="Chambre"> <span>Chambre</span></label>
+              <label class="check-option"><input type="checkbox" name="accidentRoom" value="Escaliers / circulation"> <span>Escaliers / circulation</span></label>
+              <label class="check-option"><input type="checkbox" name="accidentRoom" value="Extérieur"> <span>Extérieur</span></label>
+              <label class="check-option"><input type="checkbox" name="accidentRoom" value="Autre"> <span>Autre espace</span></label>
+            </div>
+          </fieldset>
+        </div>
+</div>
+
+      <div class="profile-step" data-step="6">
+        <h3>6. Sécurité et accès au logement</h3>
+        <fieldset class="frequency-group check-group">
+          <legend>Vous sentez-vous en sécurité dans votre logement aujourd'hui ? <span class="required-mark">*</span></legend>
+          <div class="radio-option-grid">
+            <label class="radio-option"><input type="radio" name="securityFeeling" value="Oui" required> <span>Oui</span></label>
+            <label class="radio-option"><input type="radio" name="securityFeeling" value="Non" required> <span>Non</span></label>
+          </div>
+        </fieldset>
+
+        <div id="securityDetails" hidden>
+          <p class="field-help">Si vous avez répondu non, ces quelques questions nous permettent de préciser ce qui pourrait être amélioré.</p>
+
+          <fieldset class="frequency-group check-group">
+            <legend>Comment accédez-vous principalement à votre logement ?</legend>
+            <div class="radio-option-grid">
+              <label class="radio-option"><input type="radio" name="accessType" value="Porte d'appartement dans un immeuble"> <span>Porte d'appartement dans un immeuble</span></label>
+              <label class="radio-option"><input type="radio" name="accessType" value="Porte d'entrée individuelle"> <span>Porte d'entrée individuelle</span></label>
+              <label class="radio-option"><input type="radio" name="accessType" value="Autre"> <span>Autre</span></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="frequency-group check-group">
+            <legend>Quel type de porte d'entrée avez-vous ?</legend>
+            <div class="radio-option-grid">
+              <label class="radio-option"><input type="radio" name="doorType" value="Porte blindée"> <span>Porte blindée</span></label>
+              <label class="radio-option"><input type="radio" name="doorType" value="Porte classique"> <span>Porte classique</span></label>
+              <label class="radio-option"><input type="radio" name="doorType" value="Porte vitrée ou partiellement vitrée"> <span>Porte vitrée / partiellement vitrée</span></label>
+              <label class="radio-option"><input type="radio" name="doorType" value="Je ne sais pas"> <span>Je ne sais pas</span></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="frequency-group check-group">
+            <legend>Quels équipements de sécurité ou d'accès avez-vous ?</legend>
+            <div class="check-option-grid">
+              <label class="check-option"><input type="checkbox" name="securityEquipment" value="Judas"> <span>Judas</span></label>
+              <label class="check-option"><input type="checkbox" name="securityEquipment" value="Visiophone"> <span>Visiophone</span></label>
+              <label class="check-option"><input type="checkbox" name="securityEquipment" value="Vigik / badge d'accès"> <span>Vigik / badge d'accès</span></label>
+              <label class="check-option"><input type="checkbox" name="securityEquipment" value="Alarme anti-intrusion"> <span>Alarme anti-intrusion</span></label>
+              <label class="check-option"><input type="checkbox" name="securityEquipment" value="Serrure multipoints"> <span>Serrure multipoints</span></label>
+              <label class="check-option"><input type="checkbox" name="securityEquipment" value="Serrure électronique / connectée"> <span>Serrure électronique / connectée</span></label>
+              <label class="check-option"><input type="checkbox" name="securityEquipment" value="Aucun de ces équipements"> <span>Aucun de ces équipements</span></label>
+            </div>
+          </fieldset>
+
+          <label>Qu'est-ce qui vous préoccupe ou vous gêne concernant la sécurité de votre logement ?
+            <textarea id="securityConcern" rows="3" placeholder="Décrivez librement, si vous le souhaitez…"></textarea>
+          </label>
+        </div>
+      </div>
+
+      <div class="profile-step" data-step="7">
+        <h3>7. Confort thermique</h3>
+
+        <fieldset class="frequency-group check-group">
+          <legend>Quel type de chauffage possédez-vous ? <span class="required-mark">*</span></legend>
+          <div class="check-option-grid">
+            <label class="check-option"><input type="checkbox" name="heatingType" value="Électrique individuel"> <span>Électrique individuel</span></label>
+            <label class="check-option"><input type="checkbox" name="heatingType" value="Gaz"> <span>Gaz</span></label>
+            <label class="check-option"><input type="checkbox" name="heatingType" value="Climatisation réversible"> <span>Climatisation réversible</span></label>
+            <label class="check-option"><input type="checkbox" name="heatingType" value="Chauffage collectif"> <span>Chauffage collectif</span></label>
+            <label class="check-option"><input type="checkbox" name="heatingType" value="Autre"> <span>Autre</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="frequency-group check-group">
+          <legend>Souffrez-vous régulièrement de la chaleur ou du froid dans votre logement ? <span class="required-mark">*</span></legend>
+          <div class="radio-option-grid">
+            <label class="radio-option"><input type="radio" name="thermalDiscomfort" value="Non" required> <span>Non</span></label>
+            <label class="radio-option"><input type="radio" name="thermalDiscomfort" value="Chaleur" required> <span>Oui, surtout de la chaleur</span></label>
+            <label class="radio-option"><input type="radio" name="thermalDiscomfort" value="Froid"> <span>Oui, surtout du froid</span></label>
+            <label class="radio-option"><input type="radio" name="thermalDiscomfort" value="Les deux"> <span>Oui, de la chaleur et du froid</span></label>
+          </div>
+        </fieldset>
+
+        <div id="thermalDetails" hidden>
+          <fieldset class="frequency-group check-group">
+            <legend>Dans quelles pièces ressentez-vous principalement cet inconfort ?</legend>
+            <div class="check-option-grid">
+              <label class="check-option"><input type="checkbox" name="thermalRoom" value="Cuisine"> <span>Cuisine</span></label>
+              <label class="check-option"><input type="checkbox" name="thermalRoom" value="Salon / séjour"> <span>Salon / séjour</span></label>
+              <label class="check-option"><input type="checkbox" name="thermalRoom" value="Chambre"> <span>Chambre</span></label>
+              <label class="check-option"><input type="checkbox" name="thermalRoom" value="Salle de bains"> <span>Salle de bains</span></label>
+              <label class="check-option"><input type="checkbox" name="thermalRoom" value="WC"> <span>WC</span></label>
+              <label class="check-option"><input type="checkbox" name="thermalRoom" value="Autre"> <span>Autre</span></label>
+            </div>
+          </fieldset>
+
+          <label>Si vous le souhaitez, précisez ce qui vous gêne :
+            <textarea id="thermalConcern" rows="3" placeholder="Ex. logement difficile à rafraîchir l'été, pièce froide l'hiver…"></textarea>
+          </label>
+        </div>
+      </div>
+
+      <div class="profile-step" data-step="8">
+        <h3>8. Votre projet de vie</h3>
+        <label>Combien de temps souhaitez-vous pouvoir rester dans ce logement ?
+          <select id="stayDuration" required>
+            <option value="">Choisissez…</option>
+            <option>Je ne sais pas encore</option><option>Quelques années</option><option>5 à 10 ans</option><option>10 à 15 ans</option><option>Plus de 15 ans</option>
+          </select>
+        </label>
+        <label>Envisagez-vous une évolution importante de votre logement ou de votre foyer ?
+          <select id="futureChange" required>
+            <option value="">Choisissez…</option>
+            <option>Non, pas à ma connaissance</option><option>Peut-être</option><option>Oui, probablement</option><option>Je ne sais pas</option>
+          </select>
+        </label>
+        <fieldset class="frequency-group check-group">
+          <legend>Quel est votre objectif prioritaire pour votre logement ? <span class="required-mark">*</span></legend>
+          <div class="check-option-grid">
+            <label class="check-option"><input type="radio" name="objectives" value="Améliorer mon confort" required> <span>Améliorer mon confort</span></label>
+            <label class="check-option"><input type="radio" name="objectives" value="Être en sécurité chez moi" required> <span>Être en sécurité chez moi</span></label>
+            <label class="check-option"><input type="radio" name="objectives" value="Préserver mon autonomie" required> <span>Préserver mon autonomie</span></label>
+          </div>
+        </fieldset>
+      </div>
+
+      <div class="profile-step" data-step="9">
+        <h3>9. Votre passage à l'analyse</h3>
+        <p>Merci. Nous allons maintenant utiliser ce profil comme <strong>contexte d'analyse</strong>. Il sera croisé avec vos réponses et les vidéos de chaque pièce.</p>
+        <div class="time-note">
+          <strong>Une même cuisine ne convient pas forcément de la même façon à tout le monde.</strong>
+          <p>Notre objectif est donc de comprendre votre situation actuelle et votre projet de vie, puis d'identifier les adaptations à anticiper progressivement.</p>
+        </div>
+      </div>
+
+      <div class="profile-actions">
+        <button type="button" id="profilePrev" class="secondary" disabled>Précédent</button>
+        <button type="button" id="profileNext">Continuer</button>
+      </div>
+      <div class="profile-progress" aria-live="polite">1 / 9</div>
+    </form>
+  </div>
+</section>
+<section class="screen" id="mealLocation">
+<h2>Prenez-vous habituellement vos repas dans la cuisine ?</h2>
+<p class="muted">Cette question est indépendante de la fréquence d’utilisation de la cuisine.</p>
+<div class="options single">
+<div class="opt">Oui, régulièrement</div>
+<div class="opt">Oui, de temps en temps</div>
+<div class="opt">Rarement</div>
+<div class="opt">Jamais</div>
+</div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Continuer</button></div>
+</section>
+<section class="screen" id="mealComfort">
+<h2>Votre confort pendant les repas</h2>
+<div class="field"><label>Lorsque vous mangez dans la cuisine, avez-vous une difficulté particulière ?</label>
+<div class="options single">
+<div class="opt">Non, tout est confortable</div>
+<div class="opt">M’asseoir ou me relever est gênant</div>
+<div class="opt">La table ou le siège me gêne</div>
+<div class="opt">La place autour de la table est gênante</div>
+<div class="opt">Je dois faire des mouvements qui me gênent</div>
+</div></div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Continuer</button></div>
+</section>
+<section class="screen" id="cookingType">
+<h2>Quel type de cuisson utilisez-vous principalement ?</h2>
+<p class="muted">Vous pouvez choisir plusieurs réponses si votre cuisine est équipée de plusieurs types de cuisson.</p>
+<div class="options multi">
+<div class="opt">Gaz</div>
+<div class="opt">Électricité</div>
+<div class="opt">Induction</div>
+<div class="opt">Mixte</div>
+<div class="opt">Je ne sais pas</div>
+</div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Continuer</button></div>
+</section>
+
+<section class="screen" id="gasSafety">
+<h2>Votre installation au gaz dispose-t-elle d’un détecteur de fuite de gaz ?</h2>
+<div class="options single">
+<div class="opt">Oui</div>
+<div class="opt">Non</div>
+<div class="opt">Je ne sais pas</div>
+</div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Continuer</button></div>
+</section>
+
+<section class="screen" id="gasCutoff">
+<h2>La coupure du gaz est-elle automatique en cas de problème ou d’oubli ?</h2>
+<div class="options single">
+<div class="opt">Oui</div>
+<div class="opt">Non</div>
+<div class="opt">Je ne sais pas</div>
+</div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Continuer</button></div>
+</section>
+
+<section class="screen" id="smokeDetector">
+<h2>Avez-vous un détecteur de fumée dans votre logement ?</h2>
+<div class="options single">
+<div class="opt">Oui</div>
+<div class="opt">Non</div>
+<div class="opt">Je ne sais pas</div>
+</div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Continuer</button></div>
+</section>
+
+<section class="screen" id="difficulties">
+<h2>Qu’est-ce qui vous gêne réellement aujourd’hui ?</h2>
+<p class="muted">Cochez uniquement les situations qui vous posent réellement une difficulté. Plusieurs réponses sont possibles.</p>
+<div class="options">
+<div class="opt">Utiliser les meubles bas</div>
+<div class="opt">Me pencher, m’accroupir ou me relever</div>
+<div class="opt">Utiliser les meubles hauts</div>
+<div class="opt">Rester debout ou travailler longtemps</div>
+<div class="opt">Utiliser certains équipements</div>
+<div class="opt">Circuler ou me déplacer</div>
+<div class="opt">M’asseoir ou me relever pour manger</div>
+<div class="opt">Aucune difficulté particulière</div>
+</div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Continuer</button></div>
+</section>
+<section class="screen" id="equipmentDetails">
+<h2>Quels équipements vous gênent ?</h2>
+<p class="muted">Vous avez indiqué que l’utilisation de certains équipements vous pose une difficulté. Lesquels ? Plusieurs réponses sont possibles.</p>
+<div class="options">
+<div class="opt">Utiliser le micro-ondes</div>
+<div class="opt">Utiliser le four</div>
+<div class="opt">Utiliser l’évier</div>
+<div class="opt">Brancher ou débrancher des équipements électriques (prise trop basse ou difficile d’accès)</div>
+<div class="opt">Ouvrir ou fermer le lave-vaisselle</div>
+<div class="opt">Utiliser la plaque de cuisson</div>
+<div class="opt">Utiliser le réfrigérateur ou le congélateur</div>
+<div class="opt">Autre équipement</div>
+</div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Continuer</button></div>
+</section>
+<section class="screen" id="difficultyFrequency">
+<h2>À quel point cette difficulté vous gêne-t-elle au quotidien ?</h2>
+<p class="muted">Choisissez la réponse qui correspond le mieux à votre situation.</p>
+<div class="options single">
+<div class="opt">Rarement gênante</div>
+<div class="opt">Parfois gênante</div>
+<div class="opt">Souvent gênante</div>
+<div class="opt">Très gênante</div>
+</div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Continuer</button></div>
+</section>
+<section class="screen">
+<h2>Comment la cuisine est-elle utilisée autour de vous ?</h2>
+<div class="field"><label>La cuisine est-elle aussi utilisée par d’autres personnes ?</label>
+<div class="options single">
+<div class="opt">Régulièrement</div>
+<div class="opt">Occasionnellement</div>
+<div class="opt">Non</div>
+</div></div>
+<div class="field"><label>Avez-vous une aide à domicile qui intervient dans la cuisine ?</label>
+<div class="options single">
+<div class="opt">Oui</div>
+<div class="opt">Non</div>
+</div></div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Continuer</button></div>
+</section>
+<section class="screen">
+<h2>Anticiper les prochaines années</h2>
+<div class="field"><label>Souhaitez-vous que votre cuisine reste facile et confortable à utiliser dans les prochaines années ?</label>
+<div class="options single">
+<div class="opt">Oui, je souhaite anticiper dès maintenant</div>
+<div class="opt">Oui, mais progressivement</div>
+<div class="opt">Je ne sais pas encore</div>
+<div class="opt">Ce n’est pas une priorité</div>
+</div></div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Continuer</button></div>
+</section>
+<section class="screen">
+<h2>Vos priorités</h2>
+<p class="muted">Quelles sont les principales choses que vous aimeriez améliorer dans votre cuisine ? Vous pouvez choisir plusieurs réponses.</p>
+<div class="options">
+<div class="opt">Faciliter mon quotidien</div>
+<div class="opt">Améliorer mon confort</div>
+<div class="opt">Améliorer ma sécurité</div>
+<div class="opt">Préparer l’avenir</div>
+<div class="opt">Je n’ai pas de priorité particulière</div>
+</div>
+<div class="field"><label>Une précision importante ?</label><textarea class="input" rows="3" placeholder="Facultatif"></textarea></div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Préparer la vidéo</button></div>
+</section>
+
+
+<section class="screen" id="videoIntro">
+<h2>Filmons votre cuisine ensemble</h2>
+<p class="muted">Votre caméra va être utilisée uniquement pour réaliser les séquences que nous vous indiquons. Vous pourrez revoir chaque vidéo avant de la valider.</p>
+<div class="info-card"><strong>Avant de commencer</strong><p>Installez-vous dans la cuisine, tenez votre téléphone à hauteur des yeux et déplacez-vous lentement.</p></div>
+<div id="cameraStatus" class="camera-status">Caméra non démarrée</div>
+<div class="actions"><button onclick="startCamera()">Autoriser la caméra</button><button class="secondary" onclick="next()">Continuer sans caméra</button></div>
+</section>
+
+<section class="screen" id="videoGeneral">
+<h2>1. Vue générale</h2>
+<p class="muted">Filmez lentement l’ensemble de la cuisine. Essayez de montrer les meubles, le plan de travail, la cuisson, l’évier, les équipements et les espaces de circulation.</p>
+<div class="camera-box"><video id="cameraGeneral" autoplay playsinline muted></video><div class="camera-placeholder" id="cameraGeneralPlaceholder">Aperçu caméra</div></div>
+<div class="record-status" id="recordStatusGeneral">Prêt à enregistrer</div><div class="record-timer" id="recordTimerGeneral" aria-live="polite"><span class="timer-dot"></span><span id="recordTimerValueGeneral">00:30</span></div>
+<div class="actions"><button id="recordGeneral" onclick="toggleRecording('General')">● Enregistrer</button><button id="validateGeneral" class="secondary" onclick="next()" disabled>Valider la vidéo</button></div>
+<div class="video-review" id="reviewGeneral"><video id="reviewVideoGeneral" controls playsinline></video><p>Vous pouvez revoir la séquence avant de la valider.</p></div>
+</section>
+
+<section class="screen" id="videoTargeted">
+<h2>2. Regardons les points importants</h2>
+<p class="muted">Nous allons maintenant filmer quelques éléments ciblés à partir de vos réponses.</p>
+<div class="target-list">
+<div class="target">✓ Meubles hauts et bas</div>
+<div class="target">✓ Zone de cuisson et sécurité</div>
+<div class="target">✓ Équipements signalés</div>
+<div class="target">✓ Zone des repas</div>
+</div>
+<div class="info-card"><strong>Pas besoin de tout filmer</strong><p>L’application adaptera normalement les séquences à votre situation. Dans ce prototype, nous vous faisons découvrir le parcours complet.</p></div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Continuer</button></div>
+</section>
+
+<section class="screen" id="videoTargetedCapture">
+<h2>3. Meubles et équipements ciblés</h2>
+<p class="muted">Montrez un rangement ou un équipement que vous utilisez régulièrement et qui vous gêne. Si possible, ouvrez-le ou utilisez-le comme vous le faites habituellement.</p>
+<div class="camera-box"><video id="cameraTargeted" autoplay playsinline muted></video><div class="camera-placeholder" id="cameraTargetedPlaceholder">Aperçu caméra</div></div>
+<div class="record-status" id="recordStatusTargeted">Prêt à enregistrer</div><div class="record-timer" id="recordTimerTargeted" aria-live="polite"><span class="timer-dot"></span><span id="recordTimerValueTargeted">00:30</span></div>
+<div class="actions"><button id="recordTargeted" onclick="toggleRecording('Targeted')">● Enregistrer</button><button id="validateTargeted" class="secondary" onclick="next()" disabled>Valider la vidéo</button></div>
+<div class="video-review" id="reviewTargeted"><video id="reviewVideoTargeted" controls playsinline></video><p>Revoir la séquence avant validation.</p></div>
+</section>
+
+<section class="screen" id="videoFree">
+<h2>4. Quelque chose d’autre à nous montrer ?</h2>
+<p class="muted">Cette séquence est facultative. Montrez-nous librement un endroit ou un équipement que vous souhaitez particulièrement nous montrer. Vous pourrez ensuite revoir la vidéo et la valider, ou passer cette étape.</p>
+<div class="camera-box"><video id="cameraFree" autoplay playsinline muted></video><div class="camera-placeholder" id="cameraFreePlaceholder">Aperçu caméra</div></div>
+<div class="record-status" id="recordStatusFree">Prêt à enregistrer</div><div class="record-timer" id="recordTimerFree" aria-live="polite"><span class="timer-dot"></span><span id="recordTimerValueFree">00:30</span></div>
+<div class="actions"><button id="recordFree" onclick="toggleRecording('Free')">● Enregistrer</button><button id="validateFree" class="secondary" onclick="next()" disabled>Valider la vidéo</button><button class="secondary" onclick="next()">Passer cette étape</button></div>
+<div class="video-review" id="reviewFree"><video id="reviewVideoFree" controls playsinline></video><p>Revoir la séquence avant validation.</p></div>
+</section>
+
+<section class="screen" id="videoComplete">
+<h2>Vos vidéos sont prêtes</h2>
+<p class="muted">Les séquences validées sont prêtes pour l’étape d’analyse. Dans cette V4.2.2, l’analyse reste simulée.</p>
+<div class="info-card"><strong>Protection et contrôle</strong><p>Vous contrôlez les vidéos avant leur utilisation. Dans une version connectée, les conditions de stockage et de suppression seront précisées avant l’envoi.</p></div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Lancer l’analyse</button></div>
+</section>
+
+
+<section class="screen" id="analysisPreview">
+  <h2>Première lecture de votre cuisine</h2>
+  <p class="muted">Cette étape montre comment la plateforme pourrait transformer vos réponses et vos vidéos en premières pistes d’analyse. Dans cette V4.2, l’analyse est encore simulée.</p>
+
+  <div class="info-card">
+    <strong>Ce que nous croisons</strong>
+    <p>Vos usages, vos difficultés déclarées et les éléments visibles dans les séquences vidéo validées.</p>
+  </div>
+
+  <div class="analysis-grid">
+    <div class="analysis-item"><span>01</span><div><strong>Accès aux rangements</strong><small>Hauteur, profondeur et gestes nécessaires</small></div></div>
+    <div class="analysis-item"><span>02</span><div><strong>Zone de cuisson</strong><small>Accès, gestes et organisation autour de la cuisson</small></div></div>
+    <div class="analysis-item"><span>03</span><div><strong>Circulation</strong><small>Passages, obstacles et espace disponible</small></div></div>
+    <div class="analysis-item"><span>04</span><div><strong>Équipements</strong><small>Accès et facilité d'utilisation au quotidien</small></div></div>
+  </div>
+
+  <div class="info-card">
+    <strong>Principe de prudence</strong>
+    <p>Une image ne suffit pas à conclure qu'une situation est dangereuse. La plateforme signale des points à vérifier et les croise avec votre expérience réelle.</p>
+  </div>
+
+  <div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Voir la première analyse</button></div>
+</section>
+
+<section class="screen" id="analysis">
+<h2>Analyse croisée</h2>
+<p class="muted">Nous croisons vos réponses avec les séquences vidéo que vous avez validées.</p>
+<div class="analysis-step"><span>✓</span><div><strong>Vos usages</strong><small>Fréquence et façon d’utiliser la cuisine</small></div></div>
+<div class="analysis-step"><span>✓</span><div><strong>Vos difficultés</strong><small>Situations réellement gênantes et niveau de gêne</small></div></div>
+<div class="analysis-step"><span>✓</span><div><strong>Votre environnement</strong><small>Organisation, accès, équipements et circulation visibles</small></div></div>
+<div class="analysis-step"><span>✓</span><div><strong>Vos priorités</strong><small>Ce que vous souhaitez améliorer</small></div></div>
+<div class="info-card"><strong>Notre principe</strong><p>Une recommandation n’est proposée que lorsque les informations sont suffisamment concordantes. Une absence non visible dans une vidéo n’est pas considérée comme une absence.</p></div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Voir mes résultats</button></div>
+</section>
+
+<section class="screen" id="results">
+<h2>Votre cuisine aujourd’hui</h2>
+<p class="muted">Voici les principaux points ressortant de votre questionnaire et de votre vidéo.</p>
+<div class="result-card"><div class="badge">🟢</div><div><strong>Ce qui fonctionne bien</strong><p>Les éléments sans difficulté déclarée sont conservés comme points satisfaisants.</p></div></div>
+<div class="result-card"><div class="badge">🔵</div><div><strong>Améliorations possibles</strong><p>Certains rangements ou équipements peuvent être réorganisés.</p></div></div>
+<div class="result-card"><div class="badge">🟠</div><div><strong>À anticiper</strong><p>Certains choix peuvent être préparés avant qu’une difficulté ne devienne gênante.</p></div></div>
+<div class="result-card"><div class="badge">🔴</div><div><strong>Point prioritaire</strong><p>Les éléments les plus gênants et importants pour vous sont présentés en premier.</p></div></div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Découvrir les recommandations</button></div>
+</section>
+
+<section class="screen" id="analysisResults">
+  <div class="card">
+    <h2>Votre première lecture</h2>
+    <p>À partir de vos réponses et des séquences que vous avez validées, voici les premiers éléments à regarder dans votre cuisine.</p>
+
+    <div class="score-card">
+      <div class="score-label">Facilité d'utilisation actuelle</div>
+      <div class="score-value">72<span>/100</span></div>
+      <div class="score-caption">Score indicatif — prototype V4.4.9</div>
+    </div>
+
+    <div class="analysis-grid">
+      <div class="analysis-item">
+        <strong>🟢 Points satisfaisants</strong>
+        <p>Les principaux espaces de préparation et de circulation semblent aujourd'hui accessibles et utilisables.</p>
+      </div>
+      <div class="analysis-item">
+        <strong>🟠 À anticiper</strong>
+        <p>Certaines zones de rangement ou certains gestes pourraient devenir moins confortables avec le temps.</p>
+      </div>
+      <div class="analysis-item">
+        <strong>🔵 À vérifier</strong>
+        <p>La vidéo permet de repérer des situations qui méritent une vérification plus précise, sans conclure à un danger sur la seule image.</p>
+      </div>
+    </div>
+
+    <div class="time-note">
+      <strong>La question importante : aujourd'hui… et demain</strong>
+      <p>Votre cuisine peut être confortable aujourd'hui et devenir plus contraignante progressivement.</p>
+      <p>Notre objectif est d'identifier suffisamment tôt les adaptations possibles, pour éviter de devoir tout modifier dans l'urgence.</p>
+    </div>
+
+    <button onclick="next()">Voir les priorités dans le temps</button>
+  </div>
+</section>
+
+<section class="screen" id="timeProjection">
+  <div class="card">
+    <h2>Anticiper dans le temps</h2>
+    <p>Nous ne cherchons pas seulement à savoir si votre cuisine fonctionne aujourd'hui. Nous cherchons à identifier ce qui pourrait devenir moins facile demain.</p>
+
+    <div class="analysis-grid">
+      <div class="analysis-item">
+        <strong>🟢 Aujourd'hui</strong>
+        <p><b>Confort actuel</b><br>La cuisine paraît globalement utilisable dans votre situation actuelle.</p>
+      </div>
+      <div class="analysis-item">
+        <strong>🟠 Dans 3 à 5 ans</strong>
+        <p><b>Premières adaptations possibles</b><br>Les rangements bas, les gestes répétitifs et certains accès peuvent devenir plus importants à surveiller.</p>
+      </div>
+      <div class="analysis-item">
+        <strong>🔵 Dans 5 à 10 ans</strong>
+        <p><b>Préparer sans urgence</b><br>Une organisation plus accessible peut réduire les efforts et faciliter l'utilisation quotidienne.</p>
+      </div>
+    </div>
+
+    <div class="time-note">
+      <strong>Notre principe</strong>
+      <p>Adapter progressivement plutôt que transformer dans l'urgence.</p>
+      <p>Les éléments affichés ici sont des pistes préventives. Ils ne constituent ni un diagnostic médical ni une évaluation ergonomique définitive.</p>
+    </div>
+
+    <button onclick="next()">Découvrir mes recommandations</button>
+  </div>
+</section>
+
+<section class="screen" id="recommendations">
+<h2>Vos recommandations</h2>
+<p class="muted">Des pistes adaptées à votre situation, classées par importance.</p>
+<div class="recommendation"><div class="rec-head"><span>Faciliter l’accès aux rangements</span><span class="pill">Maintenant</span></div><p>Réorganiser les objets utilisés le plus souvent afin de limiter les gestes qui vous gênent.</p><div class="rec-meta">Niveau : amélioration · Budget : faible à moyen</div></div>
+<div class="recommendation"><div class="rec-head"><span>Améliorer l’ergonomie d’un équipement</span><span class="pill">À étudier</span></div><p>Une adaptation peut être envisagée après vérification de la configuration réelle.</p><div class="rec-meta">Niveau : à confirmer · Budget : à chiffrer</div></div>
+<div class="recommendation"><div class="rec-head"><span>Anticiper l’évolution de la cuisine</span><span class="pill">3–10 ans</span></div><p>Certains choix peuvent être intégrés lors d’une prochaine rénovation.</p><div class="rec-meta">Niveau : anticipation · Travaux : à étudier</div></div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Voir mon plan d’action</button></div>
+</section>
+<section class="screen" id="actionPlan">
+<h2>Votre plan d’action</h2>
+<p class="muted">Vous restez libre de décider ce que vous souhaitez faire.</p>
+<div class="plan-row"><span class="plan-number">1</span><div><strong>Réorganiser</strong><p>Action simple, sans travaux importants.</p></div><span class="pill">Maintenant</span></div>
+<div class="plan-row"><span class="plan-number">2</span><div><strong>Adapter</strong><p>Une amélioration d’équipement peut être étudiée.</p></div><span class="pill">À étudier</span></div>
+<div class="plan-row"><span class="plan-number">3</span><div><strong>Anticiper</strong><p>À intégrer lors d’une prochaine évolution.</p></div><span class="pill">3–10 ans</span></div>
+<div class="info-card"><strong>Vous décidez</strong><p>Les recommandations sont des propositions. Vous pouvez les explorer, les remettre à plus tard ou ne pas les retenir.</p></div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Terminer</button></div>
+</section>
+<script>
+(function(){
+const screens=[...document.querySelectorAll('.screen')];let i=0;
+let stream=null;
+const recordings={};
+
+function show(){
+  screens.forEach((s,n)=>s.classList.toggle('active',n===i));
+  window.scrollTo(0,0);
+  if(stream) attachStreamToVisibleCamera();
+
+  ['General','Targeted','Free'].forEach(key=>{
+    if(!recordings[key] || !recordings[key].recording){
+      updateRecordingTimer(key, MAX_RECORDING_SECONDS, false);
+    }
+  });
+}
+
+function has(id,text){
+  const s=document.getElementById(id);
+  return !!s && [...s.querySelectorAll('.opt.selected')].some(x=>x.textContent.trim()===text);
+}
+
+function mealsInKitchen(){
+  return has('mealLocation','Oui, régulièrement')||has('mealLocation','Oui, de temps en temps');
+}
+
+function equipmentDifficultySelected(){ return has('difficulties','Utiliser certains équipements'); }
+function gasSelected(){ return has('cookingType','Gaz'); }
+
+document.querySelectorAll('.options.single').forEach(g=>g.querySelectorAll('.opt').forEach(o=>o.addEventListener('click',()=>{
+  g.querySelectorAll('.opt').forEach(x=>x.classList.remove('selected'));o.classList.add('selected');
+})));
+
+document.querySelectorAll('.options:not(.single)').forEach(g=>g.querySelectorAll('.opt').forEach(o=>o.addEventListener('click',()=>{
+  const none=o.textContent.trim()==='Je n’ai pas de priorité particulière';
+  if(none) g.querySelectorAll('.opt').forEach(x=>{if(x!==o)x.classList.remove('selected')});
+  else {const n=[...g.querySelectorAll('.opt')].find(x=>x.textContent.trim()==='Je n’ai pas de priorité particulière');if(n)n.classList.remove('selected');}
+  o.classList.toggle('selected');
+})));
+
+
+/* ===== V4.1 Camera reliability layer ===== */
+let cameraStream = null;
+let cameraRecorder = null;
+let cameraChunks = [];
+let cameraFacingMode = "environment";
+let cameraReady = false;
+let cameraRecording = false;
+let cameraStartedAt = null;
+
+function cameraIsSecure(){
+  return window.isSecureContext || location.hostname === "localhost" ||
+         location.hostname === "127.0.0.1";
+}
+function cameraSetStatus(message, kind=""){
+  const el = document.getElementById("cameraStatus");
+  if(!el) return;
+  el.className = "camera-status " + kind;
+  el.innerHTML = message;
+}
+function cameraExplainError(err){
+  const n = err && err.name ? err.name : "";
+  if(n === "NotAllowedError" || n === "PermissionDeniedError")
+    return "L’accès à la caméra a été refusé. Vérifiez l’icône caméra 🔒 dans la barre d’adresse et choisissez <b>Autoriser</b>, puis rechargez la page.";
+  if(n === "NotFoundError" || n === "DevicesNotFoundError")
+    return "Aucune caméra n’a été détectée sur cet appareil.";
+  if(n === "NotReadableError" || n === "TrackStartError")
+    return "La caméra est peut-être déjà utilisée par une autre application. Fermez Zoom, Teams, WhatsApp Web ou une autre application utilisant la caméra, puis réessayez.";
+  if(n === "SecurityError")
+    return "Le navigateur bloque la caméra pour des raisons de sécurité. Ouvrez le prototype avec <b>http://localhost</b> ou en HTTPS.";
+  if(n === "OverconstrainedError")
+    return "Le mode caméra demandé n’est pas disponible. Essayez de changer de caméra.";
+  return "La caméra n’a pas pu être démarrée. Vérifiez les autorisations du navigateur et réessayez.";
+}
+function cameraEnvironmentHint(){
+  if(cameraIsSecure()){
+    cameraSetStatus("Prêt à demander l’accès à la caméra. Cliquez sur <b>Activer la caméra</b>.", "warn");
+  }else{
+    cameraSetStatus(
+      "<b>La caméra est bloquée par le mode d’ouverture actuel.</b><br>" +
+      "Ce fichier a probablement été ouvert directement depuis votre ordinateur (adresse commençant par <b>file://</b>). " +
+      "Pour utiliser la caméra, ouvrez le prototype via <b>http://localhost</b> ou une adresse HTTPS.",
+      "err"
+    );
+  }
+}
+async function startCameraReliable(){
+  try{
+    if(!cameraIsSecure()){
+      cameraEnvironmentHint();
+      return false;
+    }
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      cameraSetStatus("<b>Accès caméra indisponible.</b> Sur iPhone, ouvrez cette page en HTTPS et utilisez Safari. Vérifiez aussi Réglages → Safari → Caméra.", "err");
+      return false;
+    }
+    if(cameraStream){
+      cameraStream.getTracks().forEach(t=>t.stop());
+      cameraStream = null;
+    }
+    cameraSetStatus("Demande d’autorisation à la caméra…", "warn");
+    const constraints = {
+      audio:false,
+      video:{
+        facingMode: cameraFacingMode,
+        width:{ideal:1280},
+        height:{ideal:720}
+      }
+    };
+    cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+    const video = document.getElementById("cameraPreview");
+    if(video){
+      video.srcObject = cameraStream;
+      video.muted = true;
+      video.playsInline = true;
+      await video.play().catch(()=>{});
+    }
+    cameraReady = true;
+    cameraSetStatus("✓ Caméra active. Vous pouvez maintenant démarrer l’enregistrement.", "ok");
+    const b = document.getElementById("cameraStartBtn");
+    if(b) b.textContent = "✓ Caméra activée";
+    return true;
+  }catch(err){
+    cameraReady = false;
+    cameraSetStatus(cameraExplainError(err), "err");
+    return false;
+  }
+}
+async function switchCameraReliable(){
+  cameraFacingMode = cameraFacingMode === "environment" ? "user" : "environment";
+  await startCameraReliable();
+}
+function cameraChooseMime(){
+  const types = ["video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"];
+  for(const t of types){
+    if(window.MediaRecorder && MediaRecorder.isTypeSupported(t)) return t;
+  }
+  return "";
+}
+function startRecordingReliable(){
+  if(!cameraReady || !cameraStream){
+    cameraSetStatus("Activez d’abord la caméra.", "warn");
+    return;
+  }
+  cameraChunks = [];
+  const mime = cameraChooseMime();
+  try{
+    cameraRecorder = mime ? new MediaRecorder(cameraStream,{mimeType:mime}) : new MediaRecorder(cameraStream);
+  }catch(e){
+    cameraSetStatus("L’enregistrement vidéo n’est pas disponible dans ce navigateur. Essayez Chrome ou Edge.", "err");
+    return;
+  }
+  cameraRecorder.ondataavailable = e => { if(e.data && e.data.size) cameraChunks.push(e.data); };
+  cameraRecorder.onstop = ()=>{
+    const blob = new Blob(cameraChunks,{type:cameraRecorder.mimeType || "video/webm"});
+    const url = URL.createObjectURL(blob);
+    const review = document.getElementById("cameraReview");
+    const reviewVideo = document.getElementById("cameraReviewVideo");
+    if(reviewVideo){ reviewVideo.src = url; reviewVideo.controls = true; reviewVideo.playsInline = true; }
+    if(review) review.style.display = "block";
+    window.__lastCameraBlob = blob;
+    window.__lastCameraUrl = url;
+    cameraRecording = false;
+    cameraSetStatus("✓ Enregistrement terminé. Regardez la vidéo puis choisissez <b>Valider</b> ou <b>Recommencer</b>.", "ok");
+    const recBtn = document.getElementById("cameraRecordBtn");
+    if(recBtn) recBtn.textContent = "● Démarrer l’enregistrement";
+  };
+  cameraRecorder.start(250);
+  cameraRecording = true;
+  cameraStartedAt = Date.now();
+  cameraSetStatus("● Enregistrement en cours… Présentez simplement la pièce ou l’équipement demandé.", "warn");
+  const recBtn = document.getElementById("cameraRecordBtn");
+  if(recBtn) recBtn.textContent = "■ Arrêter l’enregistrement";
+}
+function toggleRecordingReliable(){
+  if(cameraRecording){
+    if(cameraRecorder && cameraRecorder.state !== "inactive") cameraRecorder.stop();
+  }else{
+    startRecordingReliable();
+  }
+}
+function retryRecordingReliable(){
+  const review = document.getElementById("cameraReview");
+  if(review) review.style.display = "none";
+  if(window.__lastCameraUrl){ URL.revokeObjectURL(window.__lastCameraUrl); window.__lastCameraUrl=null; }
+  startRecordingReliable();
+}
+function validateRecordingReliable(){
+  if(!window.__lastCameraBlob){
+    cameraSetStatus("Aucun enregistrement à valider.", "warn");
+    return;
+  }
+  window.__cameraValidated = true;
+  cameraSetStatus("✓ Vidéo validée pour cette séquence. Vous pouvez continuer.", "ok");
+  const btn = document.getElementById("cameraValidateBtn");
+  if(btn) btn.disabled = true;
+}
+function stopCameraReliable(){
+  if(cameraRecorder && cameraRecorder.state !== "inactive") cameraRecorder.stop();
+  if(cameraStream){
+    cameraStream.getTracks().forEach(t=>t.stop());
+    cameraStream=null;
+  }
+  cameraReady=false;
+  const b=document.getElementById("cameraStartBtn");
+  if(b) b.textContent="Activer la caméra";
+}
+function injectCameraReliabilityUI(){
+  const root = document.querySelector("[id*='camera'], .camera, video");
+  // UI is added to each known camera screen through the generic function below.
+}
+
+async function startCamera(){
+  const status=document.getElementById('cameraStatus');
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    status.innerHTML='⚠️ La caméra n’est pas disponible dans ce contexte. Ouvrez le prototype depuis GitHub Pages (adresse HTTPS), puis réessayez.';
+    status.classList.add('error');
+    return;
+  }
+
+  try{
+    status.className='camera-status warn';
+    status.textContent='Demande d’autorisation à la caméra…';
+
+    // Sur ordinateur, on évite d’imposer le mode "environment"
+    // qui n’existe pas toujours sur les webcams. Sur mobile,
+    // on privilégie la caméra arrière.
+    const isMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const videoConstraints = isMobile
+      ? {facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}}
+      : {width:{ideal:1280},height:{ideal:720}};
+
+    // Pas de microphone demandé : cela simplifie les autorisations
+    // et suffit pour le prototype caméra.
+    stream=await navigator.mediaDevices.getUserMedia({
+      video: videoConstraints,
+      audio: false
+    });
+
+    status.className='camera-status ok';
+    status.textContent='✓ Caméra autorisée';
+
+    attachStreamToVisibleCamera();
+
+    // Go to the first recording screen after permission.
+    const idx=screens.findIndex(s=>s.id==='videoGeneral');
+    if(idx>=0){i=idx;show();}
+
+  }catch(err){
+    status.className='camera-status error';
+    const name=err && err.name ? err.name : '';
+
+    if(name==='NotAllowedError' || name==='PermissionDeniedError'){
+      status.innerHTML='❌ Accès caméra refusé. Cliquez sur l’icône caméra/cadenas dans la barre d’adresse et choisissez <b>Autoriser</b>, puis rechargez la page.';
+    }else if(name==='NotFoundError' || name==='DevicesNotFoundError'){
+      status.innerHTML='❌ Aucune caméra détectée. Vérifiez qu’une webcam est présente et qu’elle n’est pas désactivée dans Windows.';
+    }else if(name==='NotReadableError' || name==='TrackStartError'){
+      status.innerHTML='❌ La caméra est déjà utilisée par une autre application. Fermez Teams, Zoom, WhatsApp Web ou une autre application utilisant la webcam, puis réessayez.';
+    }else if(name==='SecurityError'){
+      status.innerHTML='❌ Le navigateur bloque la caméra. Ouvrez le prototype avec son adresse <b>HTTPS GitHub Pages</b>, et non avec un fichier local.';
+    }else{
+      status.innerHTML='❌ Impossible d’accéder à la caméra ('+(name||'erreur inconnue')+'). Vérifiez les autorisations du navigateur puis réessayez.';
+    }
+  }
+}
+
+function attachStreamToVisibleCamera(){
+  const active=screens[i];
+  if(!active)return;
+  const video=active.querySelector('video[id^="camera"]');
+  if(video && stream){
+    video.srcObject=stream;
+    video.muted=true;
+    video.autoplay=true;
+    video.playsInline=true;
+    const playVideo=()=>video.play().catch(()=>{});
+    if(video.readyState>=2) playVideo();
+    else video.onloadedmetadata=playVideo;
+  }
+}
+
+const MAX_RECORDING_SECONDS = 30;
+const recordingTimers = {};
+
+function formatRecordingTime(seconds){
+  const s=Math.max(0,Math.ceil(seconds));
+  return "00:" + String(s).padStart(2,"0");
+}
+
+function updateRecordingTimer(key, seconds, recording){
+  const box=document.getElementById('recordTimer'+key);
+  const value=document.getElementById('recordTimerValue'+key);
+  if(!box || !value) return;
+  value.textContent=formatRecordingTime(seconds);
+  box.classList.toggle('recording',!!recording);
+}
+
+function stopRecordingTimer(key){
+  if(recordingTimers[key]){
+    clearInterval(recordingTimers[key]);
+    delete recordingTimers[key];
+  }
+  updateRecordingTimer(key, MAX_RECORDING_SECONDS, false);
+}
+
+function startRecordingTimer(key, recorder){
+  const startedAt=Date.now();
+  updateRecordingTimer(key, MAX_RECORDING_SECONDS, true);
+
+  recordingTimers[key]=setInterval(()=>{
+    const elapsed=(Date.now()-startedAt)/1000;
+    const remaining=Math.max(0, MAX_RECORDING_SECONDS-elapsed);
+    updateRecordingTimer(key, remaining, true);
+
+    if(remaining<=0){
+      stopRecordingTimer(key);
+      if(recorder && recorder.state!=='inactive'){
+        recorder.stop();
+      }
+    }
+  },100);
+}
+
+function toggleRecording(key){
+  if(!stream){
+    alert('Autorisez d’abord la caméra.');
+    return;
+  }
+
+  const recBtn=document.getElementById('record'+key);
+  const validate=document.getElementById('validate'+key);
+  const status=document.getElementById('recordStatus'+key);
+
+  if(!recordings[key] || !recordings[key].recording){
+    const chunks=[];
+    let mime='';
+    if(typeof MediaRecorder!=='undefined'){
+      const candidates=[
+        'video/webm;codecs=vp9,opus',
+        'video/webm;codecs=vp8,opus',
+        'video/webm'
+      ];
+      for(const c of candidates){
+        if(MediaRecorder.isTypeSupported(c)){mime=c;break;}
+      }
+    }
+
+    let recorder;
+    try{
+      recorder = mime ? new MediaRecorder(stream,{mimeType:mime}) : new MediaRecorder(stream);
+    }catch(e){
+      status.textContent='L’enregistrement vidéo n’est pas disponible dans ce navigateur.';
+      return;
+    }
+
+    recorder.ondataavailable=e=>{
+      if(e.data && e.data.size) chunks.push(e.data);
+    };
+
+    recorder.onstop=()=>{
+      stopRecordingTimer(key);
+
+      const blob=new Blob(chunks,{type:recorder.mimeType || mime || 'video/webm'});
+      const url=URL.createObjectURL(blob);
+
+      // Libérer l'ancienne URL si l'utilisateur recommence.
+      if(recordings[key] && recordings[key].url){
+        URL.revokeObjectURL(recordings[key].url);
+      }
+
+      recordings[key]={recording:false,blob,url};
+
+      const review=document.getElementById('review'+key);
+      const reviewVideo=document.getElementById('reviewVideo'+key);
+
+      if(reviewVideo) reviewVideo.src=url;
+      if(review) review.classList.add('visible');
+
+      if(validate) validate.disabled=false;
+      if(recBtn){
+        recBtn.textContent='↻ Recommencer';
+        recBtn.classList.remove('record-button-recording');
+      }
+      status.textContent='✓ Séquence enregistrée — 30 secondes maximum. Vous pouvez la revoir.';
+
+      updateRecordingTimer(key, MAX_RECORDING_SECONDS, false);
+    };
+
+    recordings[key]={recording:true,recorder};
+
+    try{
+      recorder.start(250);
+    }catch(e){
+      recordings[key]={recording:false};
+      status.textContent='Impossible de démarrer l’enregistrement. Réessayez.';
+      return;
+    }
+
+    if(recBtn){
+      recBtn.textContent='■ Arrêter l’enregistrement';
+      recBtn.classList.add('record-button-recording');
+    }
+
+    status.textContent='● ENREGISTREMENT EN COURS — la séquence s’arrêtera automatiquement à 30 s';
+    startRecordingTimer(key, recorder);
+
+  }else{
+    const recorder=recordings[key].recorder;
+    if(recorder && recorder.state!=='inactive'){
+      stopRecordingTimer(key);
+      recorder.stop();
+    }
+  }
+}
+
+
+window.startCamera=startCamera;
+window.toggleRecording=toggleRecording;
+
+
+// V4.4 — questionnaire introductif "Moi & mon logement"
+(function(){
+  const form=document.getElementById('profileForm');
+
+  function setConditionalVisibility(containerId, visible){
+    const el=document.getElementById(containerId);
+    if(!el) return;
+    el.hidden=!visible;
+    el.querySelectorAll('input,select,textarea').forEach(f=>{
+      if(f.dataset.baseRequired===undefined) f.dataset.baseRequired=f.required?'1':'0';
+      f.required=visible && f.dataset.baseRequired==='1';
+    });
+  }
+
+  const mobilityRadios=[...document.querySelectorAll('input[name="mobilityRegular"]')];
+  const activeTravelRadios=[...document.querySelectorAll('input[name="activeTravel"]')];
+  const problemAreaRadios=[...document.querySelectorAll('input[name="problemAreaExists"]')];
+
+  function refreshConditionals(){
+    const mob=document.querySelector('input[name="mobilityRegular"]:checked');
+    setConditionalVisibility('mobilityDetails', !!mob && mob.value==='Oui');
+
+    const travel=document.querySelector('input[name="activeTravel"]:checked');
+    setConditionalVisibility('activeTravelDetails', !!travel && travel.value==='Oui');
+
+    const area=document.querySelector('input[name="problemAreaExists"]:checked');
+    setConditionalVisibility('problemAreaDetails', !!area && area.value==='Oui');
+
+    const homeType=document.getElementById('homeType')?.value;
+    const levels=document.getElementById('levels')?.value;
+    const elev=document.getElementById('elevatorQuestion');
+    const stairs=document.getElementById('stairsQuestion');
+
+    const floorBox=document.getElementById('floorQuestion');
+    const floorField=document.getElementById('floor');
+    if(floorBox){
+      const showFloor=homeType==='Appartement';
+      floorBox.hidden=!showFloor;
+      if(floorField) floorField.required=showFloor;
+    }
+
+    if(elev){
+      const showElev=homeType==='Appartement';
+      elev.hidden=!showElev;
+      const f=document.getElementById('elevator');
+      if(f) f.required=showElev;
+    }
+    if(stairs){
+      const showStairs=levels==='Deux niveaux' || levels==='Trois niveaux ou plus';
+      stairs.hidden=!showStairs;
+      const f=document.getElementById('stairs');
+      if(f) f.required=showStairs;
+    }
+  
+    const securityDetails=document.getElementById('securityDetails');
+    const securityAnswer=document.querySelector('input[name="securityFeeling"]:checked');
+    if(securityDetails){
+      const showSecurity=!!(securityAnswer && securityAnswer.value==='Non');
+      securityDetails.hidden=!showSecurity;
+      securityDetails.querySelectorAll('input,select,textarea').forEach(input=>input.disabled=!showSecurity);
+    }
+
+    const thermalDetails=document.getElementById('thermalDetails');
+    const thermalAnswer=document.querySelector('input[name="thermalDiscomfort"]:checked');
+    if(thermalDetails){
+      const showThermal=!!(thermalAnswer && thermalAnswer.value!=='Non');
+      thermalDetails.hidden=!showThermal;
+      thermalDetails.querySelectorAll('input,select,textarea').forEach(input=>input.disabled=!showThermal);
+    }
+
+    const accidentDetails=document.getElementById('accidentDetails');
+    const accidentAnswer=document.querySelector('input[name="domesticAccident"]:checked');
+    if(accidentDetails){
+      const showAccident=!!(accidentAnswer && accidentAnswer.value==='Oui');
+      accidentDetails.hidden=!showAccident;
+      accidentDetails.querySelectorAll('input').forEach(input=>input.disabled=!showAccident);
+    }
+}
+
+  mobilityRadios.forEach(r=>r.addEventListener('change',refreshConditionals));
+  activeTravelRadios.forEach(r=>r.addEventListener('change',refreshConditionals));
+  problemAreaRadios.forEach(r=>r.addEventListener('change',refreshConditionals));
+  document.getElementById('homeType')?.addEventListener('change',refreshConditionals);
+  document.getElementById('levels')?.addEventListener('change',refreshConditionals);
+  document.querySelectorAll('input[name="domesticAccident"]').forEach(r=>{
+    r.addEventListener('change',refreshConditionals);
+  });
+  document.querySelectorAll('input[name="securityFeeling"]').forEach(r=>{
+    r.addEventListener('change',refreshConditionals);
+  });
+  document.querySelectorAll('input[name="thermalDiscomfort"]').forEach(r=>{
+    r.addEventListener('change',refreshConditionals);
+  });
+  if(!form) return;
+
+  const steps=[...form.querySelectorAll('.profile-step')];
+  const prev=document.getElementById('profilePrev');
+  const nextBtn=document.getElementById('profileNext');
+  const actions=document.querySelector('.profile-actions');
+  const progress=form.querySelector('.profile-progress');
+  let step=0;
+
+  window.profileData={};
+  const sportSessions=document.getElementById('sportSessions');
+  const sportDuration=document.getElementById('sportDuration');
+  const sportWeeklyVolume=document.getElementById('sportWeeklyVolume');
+  const sportDetails=document.getElementById('sportDetails');
+  const sportRegular=[...document.querySelectorAll('input[name="sportRegular"]')];
+
+  function updateSportDetails(){
+    const answer=document.querySelector('input[name="sportRegular"]:checked');
+    const yes=answer && answer.value==='Oui';
+    if(sportDetails) sportDetails.hidden=!yes;
+    [...(sportDetails ? sportDetails.querySelectorAll('input,select') : [])].forEach(f=>{
+      if(f.name==='sportType') f.required=false;
+      else if(f.id==='sportSessions' || f.id==='sportDuration') f.required=yes;
+    });
+    if(!yes){
+      if(sportSessions) sportSessions.value='';
+      if(sportDuration) sportDuration.value='';
+      if(sportWeeklyVolume) sportWeeklyVolume.textContent='Volume hebdomadaire estimé : —';
+      [...document.querySelectorAll('input[name="sportType"]')].forEach(f=>f.checked=false);
+    }
+  }
+  sportRegular.forEach(r=>r.addEventListener('change',updateSportDetails));
+  updateSportDetails();
+
+
+  function updateSportVolume(){
+    if(!sportSessions || !sportDuration || !sportWeeklyVolume) return;
+    const s=Number(sportSessions.value);
+    const d=sportDuration.value;
+    let minutes=null;
+    if(d==='Moins de 30 min') minutes=15;
+    else if(d==='30 min à 1 heure') minutes=45;
+    else if(d==="Plus d'1 heure") minutes=75;
+    else if(d==='Plus de 2 heures') minutes=135;
+
+    if(Number.isFinite(s) && s>0 && minutes!==null){
+      const total=s*minutes;
+      const hours=Math.floor(total/60);
+      const mins=total%60;
+      const formatted=hours ? `${hours} h${mins ? ` ${mins} min` : ''}` : `${mins} min`;
+      sportWeeklyVolume.textContent=`Volume hebdomadaire estimé : ${formatted}`;
+    }else{
+      sportWeeklyVolume.textContent='Volume hebdomadaire estimé : —';
+    }
+  }
+
+  sportSessions?.addEventListener('input',updateSportVolume);
+  sportDuration?.addEventListener('change',updateSportVolume);
+  updateSportVolume();
+  sportSessions?.addEventListener('input',updateSportVolume);
+  sportDuration?.addEventListener('change',updateSportVolume);
+
+
+  function validateStep(){
+    const current=steps[step];
+
+    // Only validate fields that belong to the visible/current step and are not hidden.
+    const fields=[...current.querySelectorAll('select, textarea, input')]
+      .filter(field=>!field.closest('[hidden]') && !field.disabled);
+
+    for(const field of fields){
+      if(field.type==='checkbox' || field.type==='radio') continue;
+      if(!field.checkValidity()){
+        field.reportValidity();
+        return false;
+      }
+    }
+
+    // Multi-select groups: at least one choice when the group is visible.
+    const groups=[...current.querySelectorAll('.check-group')]
+      .filter(group=>!group.closest('[hidden]'));
+    for(const group of groups){
+      const boxes=[...group.querySelectorAll('input[type="checkbox"]')];
+      if(boxes.length && !boxes.some(b=>b.checked)){
+        alert('Veuillez sélectionner au moins une réponse.');
+        boxes[0].focus();
+        return false;
+      }
+    }
+
+    // Required radio groups in the current step only.
+    const radioNames=[...new Set(
+      [...current.querySelectorAll('input[type="radio"][name]')]
+        .filter(r=>!r.closest('[hidden]'))
+        .map(r=>r.name)
+    )];
+    for(const name of radioNames){
+      const radios=[...current.querySelectorAll('input[type="radio"][name="'+name+'"]')]
+        .filter(r=>!r.closest('[hidden]') && !r.disabled);
+      if(radios.length && !radios.some(r=>r.checked)){
+        alert('Veuillez sélectionner une réponse.');
+        radios[0].focus();
+        return false;
+      }
+    }
+
+    // Sport details are required only when "Oui" is selected.
+    const sportAnswer=current.querySelector('input[name="sportRegular"]:checked');
+    if(sportAnswer && sportAnswer.value==='Oui'){
+      if(!current.querySelector('input[name="sportType"]:checked')){
+        alert('Veuillez sélectionner au moins une activité.');
+        const firstSport=current.querySelector('input[name="sportType"]');
+        if(firstSport) firstSport.focus();
+        return false;
+      }
+      const sessionsField=current.querySelector('#sportSessions');
+      const durationField=current.querySelector('#sportDuration');
+      if(!sessionsField || !durationField || !sessionsField.value ||
+         parseInt(sessionsField.value,10)<1 || !durationField.value){
+        alert('Veuillez indiquer le nombre de séances par semaine et la durée moyenne.');
+        if(sessionsField && !sessionsField.value) sessionsField.focus();
+        else if(durationField) durationField.focus();
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  function saveStep(){
+    const fields=[...steps[step].querySelectorAll('select, textarea, input')];
+    fields.forEach(f=>{
+      if(f.type==='checkbox') return;
+      window.profileData[f.id]=f.value;
+    });
+
+    const names=[...new Set(
+      [...steps[step].querySelectorAll('input[type="checkbox"][name]')].map(f=>f.name)
+    )];
+    names.forEach(name=>{
+      window.profileData[name]=[...steps[step].querySelectorAll('input[type="checkbox"][name="'+name+'"]:checked')]
+        .map(f=>f.value);
+    });
+
+    const radioNames=[...new Set(
+      [...steps[step].querySelectorAll('input[type="radio"][name]')].map(f=>f.name)
+    )];
+    radioNames.forEach(name=>{
+      const checked=steps[step].querySelector('input[type="radio"][name="'+name+'"]:checked');
+      window.profileData[name]=checked ? checked.value : null;
+    });
+
+    const sportSessionsCurrent=steps[step].querySelector('#sportSessions');
+    const sportDurationCurrent=steps[step].querySelector('#sportDuration');
+    if(sportSessionsCurrent && sportDurationCurrent){
+      const regular=steps[step].querySelector('input[name="sportRegular"]:checked');
+      const sessions=parseInt(sportSessionsCurrent.value,10);
+      const duration=parseInt(sportDurationCurrent.value,10);
+      window.profileData.sport = {
+        regular: regular ? regular.value : null,
+        types: regular && regular.value==='Oui' ? [...steps[step].querySelectorAll('input[name="sportType"]:checked')].map(f=>f.value) : [],
+        sessionsPerWeek: regular && regular.value==='Oui' && Number.isFinite(sessions) ? sessions : null,
+        minutesPerSession: regular && regular.value==='Oui' && Number.isFinite(duration) ? duration : null,
+        estimatedMinutesPerWeek: regular && regular.value==='Oui' && Number.isFinite(sessions) && Number.isFinite(duration) ? sessions*duration : null
+      };
+    }
+  }
+
+  function render(){
+    steps.forEach((s,i)=>s.classList.toggle('active',i===step));
+    if(actions) steps[step].appendChild(actions);
+    prev.disabled=step===0;
+    nextBtn.textContent=step===steps.length-1 ? 'Commencer l’analyse de la cuisine' : 'Continuer';
+    progress.textContent=(step+1)+' / '+steps.length;
+    if(typeof refreshConditionals==='function') refreshConditionals();
+    window.scrollTo(0,0);
+  }
+
+  prev.addEventListener('click',()=>{
+    if(step>0){step--;render();}
+  });
+
+  nextBtn.addEventListener('click',()=>{
+    if(!validateStep()) return;
+    saveStep();
+    if(step<steps.length-1){
+      step++;
+      render();
+      return;
+    }
+    // Start the existing kitchen flow at its first non-profile screen.
+    const target=screens.findIndex(s=>s.id==='kitchenIntro');
+    if(target>=0){
+      i=target;
+      show();
+    }
+  });
+
+  render();
+})();
+
+window.next=function(){
+  const cur=screens[i];
+  if(!cur)return;
+
+  if(cur.id==='mealLocation'){
+    i=mealsInKitchen()?i+1:i+2;
+  }else if(cur.id==='cookingType'){
+    i=gasSelected()?i+1:i+3;
+  }else if(cur.id==='difficulties'){
+    i=equipmentDifficultySelected()?i+1:i+2;
+  }else if(cur.id==='kitchenIntro'){
+    i++;
+  }else if(cur.id==='videoGeneral'){
+    i++;
+  }else if(cur.id==='videoTargetedCapture'){
+    i++;
+  }else if(cur.id==='videoFree'){
+    i++;
+  }else if(cur.id==='videoComplete'){
+    i++;
+  }else if(cur.id==='analysisPreview'){
+    i++;
+  }else if(cur.id==='analysis'){
+    i++;
+  }else if(cur.id==='analysisResults'){
+    i++;
+  }else if(i<screens.length-1){
+    i++;
+  }
+  if(i<screens.length)show();
+};
+
+show();
+})();
+
+function cameraPanelShow(){
+  const p=document.getElementById("cameraReliabilityPanel");
+  if(!p) return;
+  p.style.display="block";
+  setTimeout(cameraEnvironmentHint,50);
+}
+function cameraPanelHide(){
+  const p=document.getElementById("cameraReliabilityPanel");
+  if(p) p.style.display="none";
+}
+document.addEventListener("DOMContentLoaded",()=>{
+  // Keep the panel available; user can activate it on camera steps.
+  cameraPanelHide();
+  // Expose a global manual launcher if needed.
+  window.openCameraPanel=()=>{cameraPanelShow();};
+});
+
+
+(function(){
+  function addLaunchNotice(){
+    if(location.protocol !== "file:") return;
+    const n=document.createElement("div");
+    n.style.cssText="position:fixed;inset:0;background:rgba(20,24,30,.72);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px";
+    n.innerHTML=`<div style="max-width:650px;background:#fff;border-radius:20px;padding:24px;box-shadow:0 15px 50px rgba(0,0,0,.3)">
+      <h2 style="margin-top:0">📷 Lancement de la caméra</h2>
+      <p>Le prototype est bien ouvert, mais <b>la caméra ne peut généralement pas être utilisée lorsque le fichier est ouvert directement</b> depuis votre ordinateur.</p>
+      <p><b>Solution recommandée :</b> ouvrir ce prototype via <b>http://localhost</b>.</p>
+      <p style="font-size:14px">Si Python est installé, ouvrez un terminal dans le dossier du prototype et lancez :</p>
+      <pre style="background:#f4f5f7;padding:12px;border-radius:10px;overflow:auto">python -m http.server 8000</pre>
+      <p style="font-size:14px">Puis ouvrez dans Chrome ou Edge : <b>http://localhost:8000/</b></p>
+      <button id="launchClose" style="padding:10px 16px;border-radius:10px;border:0;cursor:pointer">Continuer dans le prototype</button>
+    </div>`;
+    document.body.appendChild(n);
+    document.getElementById("launchClose").onclick=()=>n.remove();
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",addLaunchNotice);
+  else addLaunchNotice();
+})();
+
+
+/* ===== iPhone launch helpers ===== */
+function isIOSDevice(){
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+}
+function closeIphoneGuide(){
+  const g=document.getElementById("iphoneCameraGuide");
+  if(g) g.style.display="none";
+}
+function showIphoneGuide(){
+  const g=document.getElementById("iphoneCameraGuide");
+  if(g) g.style.display="flex";
+}
+function iphoneCameraReadyCheck(){
+  if(!isIOSDevice()) return;
+  const b=document.getElementById("iosCameraButton");
+  if(b) b.style.display="block";
+}
+document.addEventListener("DOMContentLoaded", ()=>{
+  iphoneCameraReadyCheck();
+  if(isIOSDevice() && location.protocol !== "https:" && location.hostname !== "localhost"){
+    showIphoneGuide();
+  }
+});
+
+</script>
+<script>
+/* V4.1.2 — robust launch/navigation bridge */
+(function(){
+  function goToFrequency(){
+    const screens=[...document.querySelectorAll('.screen')];
+    const welcome=document.getElementById('welcome');
+    const frequency=document.getElementById('frequency');
+    if(!welcome || !frequency) return;
+    screens.forEach(x=>x.classList.remove('active'));
+    frequency.classList.add('active');
+    window.scrollTo(0,0);
+  }
+
+  function bindStart(){
+    const b=document.getElementById('startPrototypeBtn');
+    if(!b) return;
+    b.addEventListener('click', function(ev){
+      ev.preventDefault();
+      try {
+        if(typeof window.next === 'function'){
+          window.next();
+          return;
+        }
+      } catch(e) {}
+      goToFrequency();
+    }, {passive:false});
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', bindStart);
+  } else {
+    bindStart();
+  }
+})();
+</script>
