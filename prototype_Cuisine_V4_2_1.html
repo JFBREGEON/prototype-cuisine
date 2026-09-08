@@ -1,0 +1,874 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cuisine V4.2 — analyse préventive</title>
+<style>
+body{margin:0;background:#f4f6f8;color:#17202a;font-family:Arial,sans-serif}.app{max-width:960px;margin:auto;padding:24px}.card{background:#fff;border-radius:20px;padding:30px;box-shadow:0 5px 25px #0001}
+h1{margin:0 0 6px}h2{margin:0 0 10px}.muted{color:#66717d;line-height:1.5}.progress{height:8px;background:#e7ebef;border-radius:8px;margin:22px 0 28px}.bar{height:100%;background:#315efb;border-radius:8px}
+.screen{display:none}.screen.active{display:block}.options{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin:18px 0}.opt{padding:14px;border:1px solid #dce1e7;border-radius:12px;cursor:pointer}.opt.selected{background:#edf2ff;border-color:#315efb}
+.box{background:#f7f8fa;border-radius:13px;padding:15px;margin:12px 0}.field{margin:18px 0}.field label{font-weight:600;display:block;margin-bottom:8px}.input,.select{width:100%;padding:12px;border:1px solid #dce1e7;border-radius:10px;box-sizing:border-box}.actions{display:flex;justify-content:flex-end;gap:10px;margin-top:25px}button{border:0;border-radius:11px;padding:12px 19px;background:#315efb;color:white;font-weight:bold;cursor:pointer}.tag{display:inline-block;background:#eef1f5;border-radius:18px;padding:6px 10px;margin:3px}.small{font-size:13px;color:#66717d}
+
+/* --- V4.1 caméra corrigée --- */
+.camera-help{
+  margin-top:14px;padding:14px;border-radius:14px;
+  background:#f6f7f9;border:1px solid #e2e5e9;font-size:14px;line-height:1.45;
+}
+.camera-status{
+  margin-top:10px;padding:10px 12px;border-radius:10px;
+  font-size:14px;background:#f6f7f9;border:1px solid #e2e5e9;
+}
+.camera-status.ok{background:#eef8f1;border-color:#b9dfc2}
+.camera-status.warn{background:#fff8e8;border-color:#ead49a}
+.camera-status.err{background:#fff0f0;border-color:#e1b2b2}
+.camera-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.camera-actions button{cursor:pointer}
+.camera-preview{
+  width:100%;max-height:360px;object-fit:cover;border-radius:16px;
+  background:#111;display:block;
+}
+.camera-checklist{
+  margin:12px 0 0;padding-left:20px;font-size:13px;line-height:1.55;
+}
+.camera-badge{
+  display:inline-block;padding:5px 9px;border-radius:999px;
+  background:#eef1f5;font-size:12px;margin:4px 4px 0 0;
+}
+
+
+/* ===== iPhone / Safari camera mode ===== */
+html, body { -webkit-text-size-adjust:100%; }
+button, input, select, textarea { font-size:16px; }
+video { -webkit-transform:translateZ(0); transform:translateZ(0); }
+#iphoneCameraGuide{
+  display:none; position:fixed; inset:0; z-index:20000;
+  background:rgba(15,18,22,.82); padding:18px;
+  align-items:center; justify-content:center;
+}
+#iphoneCameraGuide .box{
+  width:min(620px,100%); background:#fff; border-radius:22px;
+  padding:22px; max-height:90vh; overflow:auto;
+  box-shadow:0 15px 60px rgba(0,0,0,.35);
+}
+#iphoneCameraGuide h2{margin-top:0}
+#iphoneCameraGuide .step{
+  padding:10px 12px; background:#f5f6f8; border-radius:12px;
+  margin:8px 0; line-height:1.4;
+}
+#iphoneCameraGuide .primary{
+  width:100%; padding:14px 18px; border:0; border-radius:14px;
+  font-weight:700; background:#111; color:#fff; margin-top:12px;
+}
+#iosCameraButton{
+  display:none; position:fixed; left:16px; right:16px; bottom:16px;
+  z-index:19999; padding:15px; border:0; border-radius:15px;
+  font-size:17px; font-weight:700;
+}
+@media (max-width:700px){
+  #cameraReliabilityPanel{
+    left:8px !important; right:8px !important; bottom:8px !important;
+    transform:none !important; width:auto !important;
+    max-height:92vh; overflow:auto;
+  }
+  #cameraReliabilityPanel .camera-preview{max-height:42vh}
+}
+
+.button{display:inline-block;padding:12px 18px;border:0;border-radius:10px;background:#111827;color:#fff;text-decoration:none;font:inherit;cursor:pointer}
+.screen:target{display:block}
+
+<style>
+.info-card,.result-card,.recommendation,.plan-row,.analysis-step{margin:14px 0;padding:16px;border:1px solid #e5e7eb;border-radius:14px;background:#fff}
+.video-placeholder{height:220px;border:2px dashed #cbd5e1;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;margin:18px 0;background:#f8fafc}.play{font-size:34px}
+.target-list{display:grid;gap:10px;margin:18px 0}.target{padding:12px 14px;border-radius:10px;background:#f8fafc}
+.analysis-step{display:flex;gap:12px;align-items:flex-start}.analysis-step small{display:block;margin-top:4px;color:#64748b}
+.result-card{display:flex;gap:12px}.badge{font-size:20px}.rec-head{display:flex;justify-content:space-between;gap:12px;font-weight:600}.pill{font-size:12px;padding:4px 8px;border-radius:999px;background:#f1f5f9;white-space:nowrap}.rec-meta{font-size:13px;color:#64748b}
+.plan-row{display:flex;gap:12px;align-items:center}.plan-number{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#eef2ff;font-weight:700}.plan-row div{flex:1}
+
+/* ===== V4.2 analysis presentation ===== */
+.analysis-grid{display:grid;gap:10px;margin:16px 0}
+.analysis-item{display:flex;gap:12px;align-items:flex-start;padding:14px;border:1px solid #e5e7eb;border-radius:14px;background:#fff}
+.analysis-item>span{font-weight:700;min-width:28px}
+.analysis-item small{display:block;margin-top:4px;color:#64748b}
+.score-card{margin:18px 0;padding:22px;border-radius:18px;background:#f8fafc;text-align:center;border:1px solid #e5e7eb}
+.score-label{font-size:14px;color:#64748b}
+.score-value{font-size:54px;font-weight:800;line-height:1.05;margin:8px 0}
+.score-value span{font-size:22px;font-weight:600;color:#64748b}
+.score-caption{font-size:13px;color:#64748b}
+
+</style><style>
+.camera-status,.record-status{margin:12px 0;padding:10px 12px;border-radius:10px;background:#f1f5f9;font-size:14px}
+.camera-status.error{background:#fee2e2}
+.camera-box{position:relative;width:100%;max-width:760px;aspect-ratio:16/9;margin:16px auto;background:#111;border-radius:16px;overflow:hidden}
+.camera-box video{width:100%;height:100%;object-fit:cover}
+.camera-placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#cbd5e1;font-size:15px}
+.camera-box video:not([src=""])+.camera-placeholder{display:none}
+.video-review{display:none;margin:14px 0}.video-review.visible{display:block}.video-review video{width:100%;max-width:760px;border-radius:12px}
+.info-card,.analysis-step{margin:14px 0;padding:16px;border:1px solid #e5e7eb;border-radius:14px;background:#fff}
+.target-list{display:grid;gap:10px;margin:18px 0}.target{padding:12px 14px;border-radius:10px;background:#f8fafc}
+.analysis-step{display:flex;gap:12px;align-items:flex-start}.analysis-step small{display:block;margin-top:4px;color:#64748b}
+</style>
+<meta name="prototype-version" content="V4.2.1">
+</head>
+<body><div class="app"><div class="card">
+<h1>Cuisine V4.2.1 — analyse préventive</h1>
+<p class="muted">Usage → cuisson & sécurité → difficulté → précision → gêne → priorité → vidéo → analyse → recommandation</p>
+<div class="progress"><div class="bar" id="bar"></div></div>
+
+<section class="screen active" id="welcome">
+<h2>Comprendre votre cuisine</h2>
+<p class="muted">L'objectif n'est pas de chercher des défauts partout. Nous distinguons ce qui existe dans votre cuisine, ce que vous en faites et ce qui vous gêne réellement.</p>
+<div class="box"><b>Règle :</b> un constat n'est jamais considéré automatiquement comme un problème.</div>
+<div class="actions"><button type="button" id="startPrototypeBtn">Commencer</button></div>
+</section>
+
+<section class="screen" id="frequency">
+<h2>À quelle fréquence utilisez-vous votre cuisine ?</h2>
+<div class="field"><label>À quelle fréquence utilisez-vous votre cuisine ?</label>
+<div class="options single">
+<div class="opt">Tous les jours</div>
+<div class="opt">Plusieurs fois par semaine</div>
+<div class="opt">Occasionnellement</div>
+<div class="opt">Très rarement</div>
+</div></div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Continuer</button></div>
+</section>
+<section class="screen" id="mealLocation">
+<h2>Prenez-vous habituellement vos repas dans la cuisine ?</h2>
+<p class="muted">Cette question est indépendante de la fréquence d’utilisation de la cuisine.</p>
+<div class="options single">
+<div class="opt">Oui, régulièrement</div>
+<div class="opt">Oui, de temps en temps</div>
+<div class="opt">Rarement</div>
+<div class="opt">Jamais</div>
+</div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Continuer</button></div>
+</section>
+<section class="screen" id="mealComfort">
+<h2>Votre confort pendant les repas</h2>
+<div class="field"><label>Lorsque vous mangez dans la cuisine, avez-vous une difficulté particulière ?</label>
+<div class="options single">
+<div class="opt">Non, tout est confortable</div>
+<div class="opt">M’asseoir ou me relever est gênant</div>
+<div class="opt">La table ou le siège me gêne</div>
+<div class="opt">La place autour de la table est gênante</div>
+<div class="opt">Je dois faire des mouvements qui me gênent</div>
+</div></div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Continuer</button></div>
+</section>
+<section class="screen" id="cookingType">
+<h2>Quel type de cuisson utilisez-vous principalement ?</h2>
+<p class="muted">Vous pouvez choisir plusieurs réponses si votre cuisine est équipée de plusieurs types de cuisson.</p>
+<div class="options multi">
+<div class="opt">Gaz</div>
+<div class="opt">Électricité</div>
+<div class="opt">Induction</div>
+<div class="opt">Mixte</div>
+<div class="opt">Je ne sais pas</div>
+</div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Continuer</button></div>
+</section>
+
+<section class="screen" id="gasSafety">
+<h2>Votre installation au gaz dispose-t-elle d’un détecteur de fuite de gaz ?</h2>
+<div class="options single">
+<div class="opt">Oui</div>
+<div class="opt">Non</div>
+<div class="opt">Je ne sais pas</div>
+</div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Continuer</button></div>
+</section>
+
+<section class="screen" id="gasCutoff">
+<h2>La coupure du gaz est-elle automatique en cas de problème ou d’oubli ?</h2>
+<div class="options single">
+<div class="opt">Oui</div>
+<div class="opt">Non</div>
+<div class="opt">Je ne sais pas</div>
+</div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Continuer</button></div>
+</section>
+
+<section class="screen" id="smokeDetector">
+<h2>Avez-vous un détecteur de fumée dans votre logement ?</h2>
+<div class="options single">
+<div class="opt">Oui</div>
+<div class="opt">Non</div>
+<div class="opt">Je ne sais pas</div>
+</div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Continuer</button></div>
+</section>
+
+<section class="screen" id="difficulties">
+<h2>Qu’est-ce qui vous gêne réellement aujourd’hui ?</h2>
+<p class="muted">Cochez uniquement les situations qui vous posent réellement une difficulté. Plusieurs réponses sont possibles.</p>
+<div class="options">
+<div class="opt">Utiliser les meubles bas</div>
+<div class="opt">Me pencher, m’accroupir ou me relever</div>
+<div class="opt">Utiliser les meubles hauts</div>
+<div class="opt">Rester debout ou travailler longtemps</div>
+<div class="opt">Utiliser certains équipements</div>
+<div class="opt">Circuler ou me déplacer</div>
+<div class="opt">M’asseoir ou me relever pour manger</div>
+<div class="opt">Aucune difficulté particulière</div>
+</div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Continuer</button></div>
+</section>
+<section class="screen" id="equipmentDetails">
+<h2>Quels équipements vous gênent ?</h2>
+<p class="muted">Vous avez indiqué que l’utilisation de certains équipements vous pose une difficulté. Lesquels ? Plusieurs réponses sont possibles.</p>
+<div class="options">
+<div class="opt">Utiliser le micro-ondes</div>
+<div class="opt">Utiliser le four</div>
+<div class="opt">Utiliser l’évier</div>
+<div class="opt">Brancher ou débrancher des équipements électriques (prise trop basse ou difficile d’accès)</div>
+<div class="opt">Ouvrir ou fermer le lave-vaisselle</div>
+<div class="opt">Utiliser la plaque de cuisson</div>
+<div class="opt">Utiliser le réfrigérateur ou le congélateur</div>
+<div class="opt">Autre équipement</div>
+</div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Continuer</button></div>
+</section>
+<section class="screen" id="difficultyFrequency">
+<h2>À quel point cette difficulté vous gêne-t-elle au quotidien ?</h2>
+<p class="muted">Choisissez la réponse qui correspond le mieux à votre situation.</p>
+<div class="options single">
+<div class="opt">Rarement gênante</div>
+<div class="opt">Parfois gênante</div>
+<div class="opt">Souvent gênante</div>
+<div class="opt">Très gênante</div>
+</div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Continuer</button></div>
+</section>
+<section class="screen">
+<h2>Comment la cuisine est-elle utilisée autour de vous ?</h2>
+<div class="field"><label>La cuisine est-elle aussi utilisée par d’autres personnes ?</label>
+<div class="options single">
+<div class="opt">Régulièrement</div>
+<div class="opt">Occasionnellement</div>
+<div class="opt">Non</div>
+</div></div>
+<div class="field"><label>Avez-vous une aide à domicile qui intervient dans la cuisine ?</label>
+<div class="options single">
+<div class="opt">Oui</div>
+<div class="opt">Non</div>
+</div></div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Continuer</button></div>
+</section>
+<section class="screen">
+<h2>Anticiper les prochaines années</h2>
+<div class="field"><label>Souhaitez-vous que votre cuisine reste facile et confortable à utiliser dans les prochaines années ?</label>
+<div class="options single">
+<div class="opt">Oui, je souhaite anticiper dès maintenant</div>
+<div class="opt">Oui, mais progressivement</div>
+<div class="opt">Je ne sais pas encore</div>
+<div class="opt">Ce n’est pas une priorité</div>
+</div></div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Continuer</button></div>
+</section>
+<section class="screen">
+<h2>Vos priorités</h2>
+<p class="muted">Quelles sont les principales choses que vous aimeriez améliorer dans votre cuisine ? Vous pouvez choisir plusieurs réponses.</p>
+<div class="options">
+<div class="opt">Faciliter mon quotidien</div>
+<div class="opt">Améliorer mon confort</div>
+<div class="opt">Améliorer ma sécurité</div>
+<div class="opt">Préparer l’avenir</div>
+<div class="opt">Je n’ai pas de priorité particulière</div>
+</div>
+<div class="field"><label>Une précision importante ?</label><textarea class="input" rows="3" placeholder="Facultatif"></textarea></div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Préparer la vidéo</button></div>
+</section>
+
+
+<section class="screen" id="videoIntro">
+<h2>Filmons votre cuisine ensemble</h2>
+<p class="muted">Votre caméra va être utilisée uniquement pour réaliser les séquences que nous vous indiquons. Vous pourrez revoir chaque vidéo avant de la valider.</p>
+<div class="info-card"><strong>Avant de commencer</strong><p>Installez-vous dans la cuisine, tenez votre téléphone à hauteur des yeux et déplacez-vous lentement.</p></div>
+<div id="cameraStatus" class="camera-status">Caméra non démarrée</div>
+<div class="actions"><button onclick="startCamera()">Autoriser la caméra</button><button class="secondary" onclick="next()">Continuer sans caméra</button></div>
+</section>
+
+<section class="screen" id="videoGeneral">
+<h2>1. Vue générale</h2>
+<p class="muted">Filmez lentement l’ensemble de la cuisine. Essayez de montrer les meubles, le plan de travail, la cuisson, l’évier, les équipements et les espaces de circulation.</p>
+<div class="camera-box"><video id="cameraGeneral" autoplay playsinline muted></video><div class="camera-placeholder" id="cameraGeneralPlaceholder">Aperçu caméra</div></div>
+<div class="record-status" id="recordStatusGeneral">Prêt à enregistrer</div>
+<div class="actions"><button id="recordGeneral" onclick="toggleRecording('General')">● Enregistrer</button><button id="validateGeneral" class="secondary" onclick="next()" disabled>Valider la vidéo</button></div>
+<div class="video-review" id="reviewGeneral"><video id="reviewVideoGeneral" controls playsinline></video><p>Vous pouvez revoir la séquence avant de la valider.</p></div>
+</section>
+
+<section class="screen" id="videoTargeted">
+<h2>2. Regardons les points importants</h2>
+<p class="muted">Nous allons maintenant filmer quelques éléments ciblés à partir de vos réponses.</p>
+<div class="target-list">
+<div class="target">✓ Meubles hauts et bas</div>
+<div class="target">✓ Zone de cuisson et sécurité</div>
+<div class="target">✓ Équipements signalés</div>
+<div class="target">✓ Zone des repas</div>
+</div>
+<div class="info-card"><strong>Pas besoin de tout filmer</strong><p>L’application adaptera normalement les séquences à votre situation. Dans ce prototype, nous vous faisons découvrir le parcours complet.</p></div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Continuer</button></div>
+</section>
+
+<section class="screen" id="videoTargetedCapture">
+<h2>3. Meubles et équipements ciblés</h2>
+<p class="muted">Montrez un rangement ou un équipement que vous utilisez régulièrement et qui vous gêne. Si possible, ouvrez-le ou utilisez-le comme vous le faites habituellement.</p>
+<div class="camera-box"><video id="cameraTargeted" autoplay playsinline muted></video><div class="camera-placeholder" id="cameraTargetedPlaceholder">Aperçu caméra</div></div>
+<div class="record-status" id="recordStatusTargeted">Prêt à enregistrer</div>
+<div class="actions"><button id="recordTargeted" onclick="toggleRecording('Targeted')">● Enregistrer</button><button id="validateTargeted" class="secondary" onclick="next()" disabled>Valider la vidéo</button></div>
+<div class="video-review" id="reviewTargeted"><video id="reviewVideoTargeted" controls playsinline></video><p>Revoir la séquence avant validation.</p></div>
+</section>
+
+<section class="screen" id="videoFree">
+<h2>4. Quelque chose d’autre à nous montrer ?</h2>
+<p class="muted">Cette séquence est facultative. Montrez-nous librement un endroit ou un équipement que vous souhaitez particulièrement nous montrer.</p>
+<div class="camera-box"><video id="cameraFree" autoplay playsinline muted></video><div class="camera-placeholder" id="cameraFreePlaceholder">Aperçu caméra</div></div>
+<div class="record-status" id="recordStatusFree">Prêt à enregistrer</div>
+<div class="actions"><button id="recordFree" onclick="toggleRecording('Free')">● Enregistrer</button><button class="secondary" onclick="next()">Passer cette étape</button></div>
+<div class="video-review" id="reviewFree"><video id="reviewVideoFree" controls playsinline></video><p>Revoir la séquence avant validation.</p></div>
+</section>
+
+<section class="screen" id="videoComplete">
+<h2>Vos vidéos sont prêtes</h2>
+<p class="muted">Les séquences validées sont prêtes pour l’étape d’analyse. Dans cette V4.1, l’analyse reste simulée.</p>
+<div class="info-card"><strong>Protection et contrôle</strong><p>Vous contrôlez les vidéos avant leur utilisation. Dans une version connectée, les conditions de stockage et de suppression seront précisées avant l’envoi.</p></div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Lancer l’analyse</button></div>
+</section>
+
+
+<section class="screen" id="analysisPreview">
+  <h2>Première lecture de votre cuisine</h2>
+  <p class="muted">Cette étape montre comment la plateforme pourrait transformer vos réponses et vos vidéos en premières pistes d’analyse. Dans cette V4.2, l’analyse est encore simulée.</p>
+
+  <div class="info-card">
+    <strong>Ce que nous croisons</strong>
+    <p>Vos usages, vos difficultés déclarées et les éléments visibles dans les séquences vidéo validées.</p>
+  </div>
+
+  <div class="analysis-grid">
+    <div class="analysis-item"><span>01</span><div><strong>Accès aux rangements</strong><small>Hauteur, profondeur et gestes nécessaires</small></div></div>
+    <div class="analysis-item"><span>02</span><div><strong>Zone de cuisson</strong><small>Accès, gestes et organisation autour de la cuisson</small></div></div>
+    <div class="analysis-item"><span>03</span><div><strong>Circulation</strong><small>Passages, obstacles et espace disponible</small></div></div>
+    <div class="analysis-item"><span>04</span><div><strong>Équipements</strong><small>Accès et facilité d'utilisation au quotidien</small></div></div>
+  </div>
+
+  <div class="info-card">
+    <strong>Principe de prudence</strong>
+    <p>Une image ne suffit pas à conclure qu'une situation est dangereuse. La plateforme signale des points à vérifier et les croise avec votre expérience réelle.</p>
+  </div>
+
+  <div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Voir la première analyse</button></div>
+</section>
+
+<section class="screen" id="analysis">
+<h2>Analyse croisée</h2>
+<p class="muted">Nous croisons vos réponses avec les séquences vidéo que vous avez validées.</p>
+<div class="analysis-step"><span>✓</span><div><strong>Vos usages</strong><small>Fréquence et façon d’utiliser la cuisine</small></div></div>
+<div class="analysis-step"><span>✓</span><div><strong>Vos difficultés</strong><small>Situations réellement gênantes et niveau de gêne</small></div></div>
+<div class="analysis-step"><span>✓</span><div><strong>Votre environnement</strong><small>Organisation, accès, équipements et circulation visibles</small></div></div>
+<div class="analysis-step"><span>✓</span><div><strong>Vos priorités</strong><small>Ce que vous souhaitez améliorer</small></div></div>
+<div class="info-card"><strong>Notre principe</strong><p>Une recommandation n’est proposée que lorsque les informations sont suffisamment concordantes. Une absence non visible dans une vidéo n’est pas considérée comme une absence.</p></div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Voir mes résultats</button></div>
+</section>
+
+<section class="screen" id="results">
+<h2>Votre cuisine aujourd’hui</h2>
+<p class="muted">Voici les principaux points ressortant de votre questionnaire et de votre vidéo.</p>
+<div class="result-card"><div class="badge">🟢</div><div><strong>Ce qui fonctionne bien</strong><p>Les éléments sans difficulté déclarée sont conservés comme points satisfaisants.</p></div></div>
+<div class="result-card"><div class="badge">🔵</div><div><strong>Améliorations possibles</strong><p>Certains rangements ou équipements peuvent être réorganisés.</p></div></div>
+<div class="result-card"><div class="badge">🟠</div><div><strong>À anticiper</strong><p>Certains choix peuvent être préparés avant qu’une difficulté ne devienne gênante.</p></div></div>
+<div class="result-card"><div class="badge">🔴</div><div><strong>Point prioritaire</strong><p>Les éléments les plus gênants et importants pour vous sont présentés en premier.</p></div></div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Découvrir les recommandations</button></div>
+</section>
+
+<section class="screen" id="analysisResults">
+  <h2>Premières observations</h2>
+  <p class="muted">Voici comment les résultats pourraient être présentés après analyse des informations recueillies.</p>
+
+  <div class="score-card">
+    <div class="score-label">Facilité d'utilisation actuelle</div>
+    <div class="score-value">72<span>/100</span></div>
+    <div class="score-caption">Score indicatif — prototype V4.2</div>
+  </div>
+
+  <div class="result-card"><div class="badge">🟢</div><div><strong>Points satisfaisants</strong><p>Les zones qui ne font apparaître aucune difficulté déclarée sont conservées comme points positifs.</p></div></div>
+  <div class="result-card"><div class="badge">🟠</div><div><strong>À anticiper</strong><p>Certains rangements ou équipements pourraient devenir moins faciles à utiliser avec l'évolution des capacités ou des habitudes.</p></div></div>
+  <div class="result-card"><div class="badge">🔵</div><div><strong>À vérifier</strong><p>Une vérification complémentaire est recommandée avant de conclure à un problème d'accessibilité ou de sécurité.</p></div></div>
+
+  <div class="info-card">
+    <strong>Pourquoi ce résultat ?</strong>
+    <p>Le score n'est pas un diagnostic médical. Il sert à prioriser les éléments du logement qui méritent une attention ou une adaptation progressive.</p>
+  </div>
+
+  <div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Découvrir les recommandations</button></div>
+</section>
+
+<section class="screen" id="recommendations">
+<h2>Vos recommandations</h2>
+<p class="muted">Des pistes adaptées à votre situation, classées par importance.</p>
+<div class="recommendation"><div class="rec-head"><span>Faciliter l’accès aux rangements</span><span class="pill">Maintenant</span></div><p>Réorganiser les objets utilisés le plus souvent afin de limiter les gestes qui vous gênent.</p><div class="rec-meta">Niveau : amélioration · Budget : faible à moyen</div></div>
+<div class="recommendation"><div class="rec-head"><span>Améliorer l’ergonomie d’un équipement</span><span class="pill">À étudier</span></div><p>Une adaptation peut être envisagée après vérification de la configuration réelle.</p><div class="rec-meta">Niveau : à confirmer · Budget : à chiffrer</div></div>
+<div class="recommendation"><div class="rec-head"><span>Anticiper l’évolution de la cuisine</span><span class="pill">3–10 ans</span></div><p>Certains choix peuvent être intégrés lors d’une prochaine rénovation.</p><div class="rec-meta">Niveau : anticipation · Travaux : à étudier</div></div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Voir mon plan d’action</button></div>
+</section>
+<section class="screen" id="actionPlan">
+<h2>Votre plan d’action</h2>
+<p class="muted">Vous restez libre de décider ce que vous souhaitez faire.</p>
+<div class="plan-row"><span class="plan-number">1</span><div><strong>Réorganiser</strong><p>Action simple, sans travaux importants.</p></div><span class="pill">Maintenant</span></div>
+<div class="plan-row"><span class="plan-number">2</span><div><strong>Adapter</strong><p>Une amélioration d’équipement peut être étudiée.</p></div><span class="pill">À étudier</span></div>
+<div class="plan-row"><span class="plan-number">3</span><div><strong>Anticiper</strong><p>À intégrer lors d’une prochaine évolution.</p></div><span class="pill">3–10 ans</span></div>
+<div class="info-card"><strong>Vous décidez</strong><p>Les recommandations sont des propositions. Vous pouvez les explorer, les remettre à plus tard ou ne pas les retenir.</p></div>
+<div class="actions"><button type="button" onclick="try{window.next();}catch(e){}">Terminer</button></div>
+</section>
+<script>
+(function(){
+const screens=[...document.querySelectorAll('.screen')];let i=0;
+let stream=null;
+const recordings={};
+
+function show(){
+  screens.forEach((s,n)=>s.classList.toggle('active',n===i));
+  window.scrollTo(0,0);
+  if(stream) attachStreamToVisibleCamera();
+}
+
+function has(id,text){
+  const s=document.getElementById(id);
+  return !!s && [...s.querySelectorAll('.opt.selected')].some(x=>x.textContent.trim()===text);
+}
+
+function mealsInKitchen(){
+  return has('mealLocation','Oui, régulièrement')||has('mealLocation','Oui, de temps en temps');
+}
+
+function equipmentDifficultySelected(){ return has('difficulties','Utiliser certains équipements'); }
+function gasSelected(){ return has('cookingType','Gaz'); }
+
+document.querySelectorAll('.options.single').forEach(g=>g.querySelectorAll('.opt').forEach(o=>o.addEventListener('click',()=>{
+  g.querySelectorAll('.opt').forEach(x=>x.classList.remove('selected'));o.classList.add('selected');
+})));
+
+document.querySelectorAll('.options:not(.single)').forEach(g=>g.querySelectorAll('.opt').forEach(o=>o.addEventListener('click',()=>{
+  const none=o.textContent.trim()==='Je n’ai pas de priorité particulière';
+  if(none) g.querySelectorAll('.opt').forEach(x=>{if(x!==o)x.classList.remove('selected')});
+  else {const n=[...g.querySelectorAll('.opt')].find(x=>x.textContent.trim()==='Je n’ai pas de priorité particulière');if(n)n.classList.remove('selected');}
+  o.classList.toggle('selected');
+})));
+
+
+/* ===== V4.1 Camera reliability layer ===== */
+let cameraStream = null;
+let cameraRecorder = null;
+let cameraChunks = [];
+let cameraFacingMode = "environment";
+let cameraReady = false;
+let cameraRecording = false;
+let cameraStartedAt = null;
+
+function cameraIsSecure(){
+  return window.isSecureContext || location.hostname === "localhost" ||
+         location.hostname === "127.0.0.1";
+}
+function cameraSetStatus(message, kind=""){
+  const el = document.getElementById("cameraStatus");
+  if(!el) return;
+  el.className = "camera-status " + kind;
+  el.innerHTML = message;
+}
+function cameraExplainError(err){
+  const n = err && err.name ? err.name : "";
+  if(n === "NotAllowedError" || n === "PermissionDeniedError")
+    return "L’accès à la caméra a été refusé. Vérifiez l’icône caméra 🔒 dans la barre d’adresse et choisissez <b>Autoriser</b>, puis rechargez la page.";
+  if(n === "NotFoundError" || n === "DevicesNotFoundError")
+    return "Aucune caméra n’a été détectée sur cet appareil.";
+  if(n === "NotReadableError" || n === "TrackStartError")
+    return "La caméra est peut-être déjà utilisée par une autre application. Fermez Zoom, Teams, WhatsApp Web ou une autre application utilisant la caméra, puis réessayez.";
+  if(n === "SecurityError")
+    return "Le navigateur bloque la caméra pour des raisons de sécurité. Ouvrez le prototype avec <b>http://localhost</b> ou en HTTPS.";
+  if(n === "OverconstrainedError")
+    return "Le mode caméra demandé n’est pas disponible. Essayez de changer de caméra.";
+  return "La caméra n’a pas pu être démarrée. Vérifiez les autorisations du navigateur et réessayez.";
+}
+function cameraEnvironmentHint(){
+  if(cameraIsSecure()){
+    cameraSetStatus("Prêt à demander l’accès à la caméra. Cliquez sur <b>Activer la caméra</b>.", "warn");
+  }else{
+    cameraSetStatus(
+      "<b>La caméra est bloquée par le mode d’ouverture actuel.</b><br>" +
+      "Ce fichier a probablement été ouvert directement depuis votre ordinateur (adresse commençant par <b>file://</b>). " +
+      "Pour utiliser la caméra, ouvrez le prototype via <b>http://localhost</b> ou une adresse HTTPS.",
+      "err"
+    );
+  }
+}
+async function startCameraReliable(){
+  try{
+    if(!cameraIsSecure()){
+      cameraEnvironmentHint();
+      return false;
+    }
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      cameraSetStatus("<b>Accès caméra indisponible.</b> Sur iPhone, ouvrez cette page en HTTPS et utilisez Safari. Vérifiez aussi Réglages → Safari → Caméra.", "err");
+      return false;
+    }
+    if(cameraStream){
+      cameraStream.getTracks().forEach(t=>t.stop());
+      cameraStream = null;
+    }
+    cameraSetStatus("Demande d’autorisation à la caméra…", "warn");
+    const constraints = {
+      audio:false,
+      video:{
+        facingMode: cameraFacingMode,
+        width:{ideal:1280},
+        height:{ideal:720}
+      }
+    };
+    cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+    const video = document.getElementById("cameraPreview");
+    if(video){
+      video.srcObject = cameraStream;
+      video.muted = true;
+      video.playsInline = true;
+      await video.play().catch(()=>{});
+    }
+    cameraReady = true;
+    cameraSetStatus("✓ Caméra active. Vous pouvez maintenant démarrer l’enregistrement.", "ok");
+    const b = document.getElementById("cameraStartBtn");
+    if(b) b.textContent = "✓ Caméra activée";
+    return true;
+  }catch(err){
+    cameraReady = false;
+    cameraSetStatus(cameraExplainError(err), "err");
+    return false;
+  }
+}
+async function switchCameraReliable(){
+  cameraFacingMode = cameraFacingMode === "environment" ? "user" : "environment";
+  await startCameraReliable();
+}
+function cameraChooseMime(){
+  const types = ["video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"];
+  for(const t of types){
+    if(window.MediaRecorder && MediaRecorder.isTypeSupported(t)) return t;
+  }
+  return "";
+}
+function startRecordingReliable(){
+  if(!cameraReady || !cameraStream){
+    cameraSetStatus("Activez d’abord la caméra.", "warn");
+    return;
+  }
+  cameraChunks = [];
+  const mime = cameraChooseMime();
+  try{
+    cameraRecorder = mime ? new MediaRecorder(cameraStream,{mimeType:mime}) : new MediaRecorder(cameraStream);
+  }catch(e){
+    cameraSetStatus("L’enregistrement vidéo n’est pas disponible dans ce navigateur. Essayez Chrome ou Edge.", "err");
+    return;
+  }
+  cameraRecorder.ondataavailable = e => { if(e.data && e.data.size) cameraChunks.push(e.data); };
+  cameraRecorder.onstop = ()=>{
+    const blob = new Blob(cameraChunks,{type:cameraRecorder.mimeType || "video/webm"});
+    const url = URL.createObjectURL(blob);
+    const review = document.getElementById("cameraReview");
+    const reviewVideo = document.getElementById("cameraReviewVideo");
+    if(reviewVideo){ reviewVideo.src = url; reviewVideo.controls = true; reviewVideo.playsInline = true; }
+    if(review) review.style.display = "block";
+    window.__lastCameraBlob = blob;
+    window.__lastCameraUrl = url;
+    cameraRecording = false;
+    cameraSetStatus("✓ Enregistrement terminé. Regardez la vidéo puis choisissez <b>Valider</b> ou <b>Recommencer</b>.", "ok");
+    const recBtn = document.getElementById("cameraRecordBtn");
+    if(recBtn) recBtn.textContent = "● Démarrer l’enregistrement";
+  };
+  cameraRecorder.start(250);
+  cameraRecording = true;
+  cameraStartedAt = Date.now();
+  cameraSetStatus("● Enregistrement en cours… Présentez simplement la pièce ou l’équipement demandé.", "warn");
+  const recBtn = document.getElementById("cameraRecordBtn");
+  if(recBtn) recBtn.textContent = "■ Arrêter l’enregistrement";
+}
+function toggleRecordingReliable(){
+  if(cameraRecording){
+    if(cameraRecorder && cameraRecorder.state !== "inactive") cameraRecorder.stop();
+  }else{
+    startRecordingReliable();
+  }
+}
+function retryRecordingReliable(){
+  const review = document.getElementById("cameraReview");
+  if(review) review.style.display = "none";
+  if(window.__lastCameraUrl){ URL.revokeObjectURL(window.__lastCameraUrl); window.__lastCameraUrl=null; }
+  startRecordingReliable();
+}
+function validateRecordingReliable(){
+  if(!window.__lastCameraBlob){
+    cameraSetStatus("Aucun enregistrement à valider.", "warn");
+    return;
+  }
+  window.__cameraValidated = true;
+  cameraSetStatus("✓ Vidéo validée pour cette séquence. Vous pouvez continuer.", "ok");
+  const btn = document.getElementById("cameraValidateBtn");
+  if(btn) btn.disabled = true;
+}
+function stopCameraReliable(){
+  if(cameraRecorder && cameraRecorder.state !== "inactive") cameraRecorder.stop();
+  if(cameraStream){
+    cameraStream.getTracks().forEach(t=>t.stop());
+    cameraStream=null;
+  }
+  cameraReady=false;
+  const b=document.getElementById("cameraStartBtn");
+  if(b) b.textContent="Activer la caméra";
+}
+function injectCameraReliabilityUI(){
+  const root = document.querySelector("[id*='camera'], .camera, video");
+  // UI is added to each known camera screen through the generic function below.
+}
+
+async function startCamera(){
+  const status=document.getElementById('cameraStatus');
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    status.innerHTML='⚠️ La caméra n’est pas disponible dans ce contexte. Ouvrez le prototype depuis GitHub Pages (adresse HTTPS), puis réessayez.';
+    status.classList.add('error');
+    return;
+  }
+
+  try{
+    status.className='camera-status warn';
+    status.textContent='Demande d’autorisation à la caméra…';
+
+    // Sur ordinateur, on évite d’imposer le mode "environment"
+    // qui n’existe pas toujours sur les webcams. Sur mobile,
+    // on privilégie la caméra arrière.
+    const isMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const videoConstraints = isMobile
+      ? {facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}}
+      : {width:{ideal:1280},height:{ideal:720}};
+
+    // Pas de microphone demandé : cela simplifie les autorisations
+    // et suffit pour le prototype caméra.
+    stream=await navigator.mediaDevices.getUserMedia({
+      video: videoConstraints,
+      audio: false
+    });
+
+    status.className='camera-status ok';
+    status.textContent='✓ Caméra autorisée';
+
+    attachStreamToVisibleCamera();
+
+    // Go to the first recording screen after permission.
+    const idx=screens.findIndex(s=>s.id==='videoGeneral');
+    if(idx>=0){i=idx;show();}
+
+  }catch(err){
+    status.className='camera-status error';
+    const name=err && err.name ? err.name : '';
+
+    if(name==='NotAllowedError' || name==='PermissionDeniedError'){
+      status.innerHTML='❌ Accès caméra refusé. Cliquez sur l’icône caméra/cadenas dans la barre d’adresse et choisissez <b>Autoriser</b>, puis rechargez la page.';
+    }else if(name==='NotFoundError' || name==='DevicesNotFoundError'){
+      status.innerHTML='❌ Aucune caméra détectée. Vérifiez qu’une webcam est présente et qu’elle n’est pas désactivée dans Windows.';
+    }else if(name==='NotReadableError' || name==='TrackStartError'){
+      status.innerHTML='❌ La caméra est déjà utilisée par une autre application. Fermez Teams, Zoom, WhatsApp Web ou une autre application utilisant la webcam, puis réessayez.';
+    }else if(name==='SecurityError'){
+      status.innerHTML='❌ Le navigateur bloque la caméra. Ouvrez le prototype avec son adresse <b>HTTPS GitHub Pages</b>, et non avec un fichier local.';
+    }else{
+      status.innerHTML='❌ Impossible d’accéder à la caméra ('+(name||'erreur inconnue')+'). Vérifiez les autorisations du navigateur puis réessayez.';
+    }
+  }
+}
+
+function attachStreamToVisibleCamera(){
+  const active=screens[i];
+  if(!active)return;
+  const video=active.querySelector('video[id^="camera"]');
+  if(video && stream){
+    video.srcObject=stream;
+    video.muted=true;
+    video.autoplay=true;
+    video.playsInline=true;
+    const playVideo=()=>video.play().catch(()=>{});
+    if(video.readyState>=2) playVideo();
+    else video.onloadedmetadata=playVideo;
+  }
+}
+
+function toggleRecording(key){
+  if(!stream){
+    alert('Autorisez d’abord la caméra.');
+    return;
+  }
+  const recBtn=document.getElementById('record'+key);
+  const validate=document.getElementById('validate'+key);
+  const status=document.getElementById('recordStatus'+key);
+
+  if(!recordings[key] || !recordings[key].recording){
+    const chunks=[];
+    let mime='video/webm';
+    if(typeof MediaRecorder!=='undefined'){
+      const candidates=['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
+      for(const c of candidates){if(MediaRecorder.isTypeSupported(c)){mime=c;break;}}
+    }
+    const recorder=new MediaRecorder(stream,{mimeType:mime});
+    recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data);};
+    recorder.onstop=()=>{
+      const blob=new Blob(chunks,{type:mime});
+      const url=URL.createObjectURL(blob);
+      recordings[key]={recording:false,blob,url};
+      const review=document.getElementById('review'+key);
+      const reviewVideo=document.getElementById('reviewVideo'+key);
+      reviewVideo.src=url;
+      review.classList.add('visible');
+      validate.disabled=false;
+      recBtn.textContent='↻ Recommencer';
+      status.textContent='✓ Séquence enregistrée — vous pouvez la revoir';
+    };
+    recordings[key]={recording:true,recorder};
+    recorder.start();
+    recBtn.textContent='■ Arrêter';
+    status.textContent='● Enregistrement en cours';
+  }else{
+    recordings[key].recorder.stop();
+  }
+}
+
+window.startCamera=startCamera;
+window.toggleRecording=toggleRecording;
+
+window.next=function(){
+  const cur=screens[i];
+  if(!cur)return;
+
+  if(cur.id==='mealLocation'){
+    i=mealsInKitchen()?i+1:i+2;
+  }else if(cur.id==='cookingType'){
+    i=gasSelected()?i+1:i+3;
+  }else if(cur.id==='difficulties'){
+    i=equipmentDifficultySelected()?i+1:i+2;
+  }else if(cur.id==='videoGeneral'){
+    i++;
+  }else if(cur.id==='videoTargetedCapture'){
+    i++;
+  }else if(cur.id==='videoFree'){
+    i++;
+  }else if(cur.id==='videoComplete'){
+    i++;
+  }else if(cur.id==='analysisPreview'){
+    i++;
+  }else if(cur.id==='analysis'){
+    i++;
+  }else if(cur.id==='analysisResults'){
+    i++;
+  }else if(i<screens.length-1){
+    i++;
+  }
+  if(i<screens.length)show();
+};
+
+show();
+})();
+
+function cameraPanelShow(){
+  const p=document.getElementById("cameraReliabilityPanel");
+  if(!p) return;
+  p.style.display="block";
+  setTimeout(cameraEnvironmentHint,50);
+}
+function cameraPanelHide(){
+  const p=document.getElementById("cameraReliabilityPanel");
+  if(p) p.style.display="none";
+}
+document.addEventListener("DOMContentLoaded",()=>{
+  // Keep the panel available; user can activate it on camera steps.
+  cameraPanelHide();
+  // Expose a global manual launcher if needed.
+  window.openCameraPanel=()=>{cameraPanelShow();};
+});
+
+
+(function(){
+  function addLaunchNotice(){
+    if(location.protocol !== "file:") return;
+    const n=document.createElement("div");
+    n.style.cssText="position:fixed;inset:0;background:rgba(20,24,30,.72);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px";
+    n.innerHTML=`<div style="max-width:650px;background:#fff;border-radius:20px;padding:24px;box-shadow:0 15px 50px rgba(0,0,0,.3)">
+      <h2 style="margin-top:0">📷 Lancement de la caméra</h2>
+      <p>Le prototype est bien ouvert, mais <b>la caméra ne peut généralement pas être utilisée lorsque le fichier est ouvert directement</b> depuis votre ordinateur.</p>
+      <p><b>Solution recommandée :</b> ouvrir ce prototype via <b>http://localhost</b>.</p>
+      <p style="font-size:14px">Si Python est installé, ouvrez un terminal dans le dossier du prototype et lancez :</p>
+      <pre style="background:#f4f5f7;padding:12px;border-radius:10px;overflow:auto">python -m http.server 8000</pre>
+      <p style="font-size:14px">Puis ouvrez dans Chrome ou Edge : <b>http://localhost:8000/</b></p>
+      <button id="launchClose" style="padding:10px 16px;border-radius:10px;border:0;cursor:pointer">Continuer dans le prototype</button>
+    </div>`;
+    document.body.appendChild(n);
+    document.getElementById("launchClose").onclick=()=>n.remove();
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",addLaunchNotice);
+  else addLaunchNotice();
+})();
+
+
+/* ===== iPhone launch helpers ===== */
+function isIOSDevice(){
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+}
+function closeIphoneGuide(){
+  const g=document.getElementById("iphoneCameraGuide");
+  if(g) g.style.display="none";
+}
+function showIphoneGuide(){
+  const g=document.getElementById("iphoneCameraGuide");
+  if(g) g.style.display="flex";
+}
+function iphoneCameraReadyCheck(){
+  if(!isIOSDevice()) return;
+  const b=document.getElementById("iosCameraButton");
+  if(b) b.style.display="block";
+}
+document.addEventListener("DOMContentLoaded", ()=>{
+  iphoneCameraReadyCheck();
+  if(isIOSDevice() && location.protocol !== "https:" && location.hostname !== "localhost"){
+    showIphoneGuide();
+  }
+});
+
+</script>
+<script>
+/* V4.1.2 — robust launch/navigation bridge */
+(function(){
+  function goToFrequency(){
+    const screens=[...document.querySelectorAll('.screen')];
+    const welcome=document.getElementById('welcome');
+    const frequency=document.getElementById('frequency');
+    if(!welcome || !frequency) return;
+    screens.forEach(x=>x.classList.remove('active'));
+    frequency.classList.add('active');
+    window.scrollTo(0,0);
+  }
+
+  function bindStart(){
+    const b=document.getElementById('startPrototypeBtn');
+    if(!b) return;
+    b.addEventListener('click', function(ev){
+      ev.preventDefault();
+      try {
+        if(typeof window.next === 'function'){
+          window.next();
+          return;
+        }
+      } catch(e) {}
+      goToFrequency();
+    }, {passive:false});
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', bindStart);
+  } else {
+    bindStart();
+  }
+})();
+</script>
