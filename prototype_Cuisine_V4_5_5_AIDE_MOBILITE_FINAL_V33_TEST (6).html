@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>Cuisine V4.5.5 — AIDE MOBILITÉ FINAL V31</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f5f7fa;color:#17202a;font-family:Arial,sans-serif}.app{max-width:900px;margin:auto;padding:18px}.card{background:white;border-radius:18px;padding:24px;box-shadow:0 3px 18px #00000012}.screen{display:none}.screen.active{display:block}.muted{color:#667085}.eyebrow{font-size:12px;font-weight:bold;letter-spacing:.08em;color:#667085}.progress{height:8px;background:#e5e7eb;border-radius:8px;margin:18px 0 25px}.bar{height:100%;background:#315efb;border-radius:8px;width:0}.field,fieldset{border:0;margin:18px 0;padding:0}.field label,legend{font-weight:600;display:block;margin-bottom:8px}.options{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.opt{border:1px solid #d0d5dd;border-radius:11px;padding:13px;cursor:pointer}.opt.selected{border:2px solid #315efb;background:#f0f4ff}.input,select,textarea{width:100%;padding:12px;border:1px solid #d0d5dd;border-radius:10px;font-size:16px;background:#fff}.actions{display:flex;justify-content:space-between;gap:10px;margin-top:24px}button{border:0;border-radius:10px;padding:12px 18px;font-size:16px;background:#315efb;color:#fff;cursor:pointer}button.secondary{background:#e7e9ee;color:#17202a}.info-card,.result-card{padding:16px;border-radius:12px;background:#f8fafc;margin:14px 0}.camera{width:100%;aspect-ratio:16/9;background:#111;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center;color:#fff}.camera video{width:100%;height:100%;object-fit:cover}.timer{font-size:22px;font-weight:bold;text-align:center;margin:12px}.profile-step{display:none}.profile-step.active{display:block}.profile-actions{display:flex;justify-content:space-between;margin-top:20px}.small{font-size:13px}.check{display:flex;gap:8px;align-items:center;padding:11px;border:1px solid #d0d5dd;border-radius:10px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.residence-field{position:relative}.city-suggestions{position:absolute;left:0;right:0;top:100%;z-index:20;background:#fff;border:1px solid #d0d5dd;border-radius:10px;box-shadow:0 8px 20px #00000018;max-height:280px;overflow:auto}.city-option{padding:12px 14px;cursor:pointer;border-bottom:1px solid #eef0f3;font-size:16px}.city-option:last-child{border-bottom:0}.city-option:hover{background:#eef3ff}.grid .check{cursor:pointer}.check:has(input:checked){border:2px solid #315efb;background:#eef3ff}.required-mark{color:#315efb}.frequency-group{margin-bottom:20px}@media(max-width:650px){.app{padding:9px}.card{padding:17px}.options,.grid{grid-template-columns:1fr}}
+</style>
+
+<style>
+#quickTestBtn{position:fixed;right:16px;bottom:16px;z-index:99999;background:#7c3aed;color:#fff;border:0;border-radius:12px;padding:12px 16px;font:600 14px Arial;box-shadow:0 4px 16px #0003;cursor:pointer}
+#quickTestNote{position:fixed;right:16px;bottom:68px;z-index:99999;background:#fff;border:1px solid #c4b5fd;border-radius:10px;padding:10px 12px;max-width:310px;font:13px Arial;color:#333;box-shadow:0 4px 16px #0002;display:none}
+</style>
+</head>
+<body>
+<div class="app"><div class="card">
+<h1>Cuisine V4.5.5 — V31</h1>
+<p class="muted">AIDE MOBILITÉ — questionnaire complet → vidéo → analyse → recommandations</p>
+<div class="progress"><div class="bar" id="bar"></div></div>
+<!-- PROFIL -->
+<section class="screen active" id="profile">
+<div class="eyebrow">ÉTAPE 1 · VOUS ET VOTRE LOGEMENT</div>
+<h2>Votre profil</h2>
+<div class="profile-step active" id="p1">
+<div class="field residence-field">
+<label for="residenceCity">Quel est votre lieu de résidence ?</label>
+<input aria-autocomplete="list" aria-controls="citySuggestions" autocomplete="off" class="input" id="residenceCity" placeholder="Tapez les 3 premières lettres de votre ville…" required="" type="text"/>
+<div class="city-suggestions" hidden="" id="citySuggestions" role="listbox"></div>
+<p class="small muted">France entière — commencez à saisir le nom de votre ville. Le code postal est indiqué entre parenthèses.</p>
+</div>
+<div class="field"><label>Quelle est votre tranche d'âge ?</label><select id="age" required=""><option value="">Choisissez…</option><option>55–59 ans</option><option>60–64 ans</option><option>65–69 ans</option><option>70–74 ans</option><option>75–79 ans</option><option>80 ans ou plus</option></select></div>
+<div class="field"><label>Comment vivez-vous actuellement ?</label><select id="household" required=""><option value="">Choisissez…</option><option>Seul(e)</option><option>En couple</option><option>Avec d'autres membres de la famille</option><option>Autre situation</option></select></div>
+<div class="field"><label>Quel est votre statut dans votre logement ?</label><select id="occupancy" required=""><option value="">Choisissez…</option><option>Propriétaire</option><option>Locataire</option><option>Hébergé(e) par votre famille</option><option>Autre</option></select></div>
+<div hidden="" id="occOther"><div class="field"><label>Précisez</label><input class="input" id="occOtherText"/></div></div>
+<div class="field"><label>Comment évaluez-vous votre forme physique aujourd'hui ?</label><select id="fitness" required=""><option value="">Choisissez…</option><option>Très bonne</option><option>Bonne</option><option>Moyenne</option><option>Variable</option><option>Je préfère ne pas répondre</option></select></div>
+</div>
+<div class="profile-step" id="p2">
+<h3>Mobilité et quotidien</h3>
+<fieldset><legend>Rencontrez-vous actuellement une difficulté qui peut influencer l'utilisation de votre logement ?</legend><div class="options"><div class="opt" data-radio="difficulty">Non</div><div class="opt" data-radio="difficulty">Oui</div></div></fieldset>
+<div hidden="" id="mobDetails">
+<fieldset><legend>De quel(s) type(s) de difficulté s'agit-il ?</legend><div class="grid"><label class="check"><input name="mobType" type="checkbox" value="Mobilité / déplacements"/>Mobilité / déplacements</label><label class="check"><input name="mobType" type="checkbox" value="Équilibre / stabilité"/>Équilibre / stabilité</label><label class="check"><input name="mobType" type="checkbox" value="Gestes / force / préhension"/>Gestes / force / préhension</label><label class="check"><input name="mobType" type="checkbox" value="Vision / perception"/>Vision / perception</label><label class="check"><input name="mobType" type="checkbox" value="Audition"/>Audition</label><label class="check"><input name="mobType" type="checkbox" value="Fatigue / endurance"/>Fatigue / endurance</label></div></fieldset>
+<fieldset><legend>Y a-t-il des mouvements ou situations que vous évitez déjà ?</legend><div class="grid"><label class="check"><input name="avoid" type="checkbox" value="Escaliers"/>Les escaliers</label><label class="check"><input name="avoid" type="checkbox" value="Se pencher"/>Se pencher / s'accroupir</label><label class="check"><input name="avoid" type="checkbox" value="Hauteur"/>Atteindre en hauteur</label><label class="check"><input name="avoid" type="checkbox" value="Debout"/>Rester longtemps debout</label><label class="check"><input name="avoid" type="checkbox" value="Porter"/>Porter / déplacer des objets</label><label class="check"><input name="avoid" type="checkbox" value="Aucune"/>Aucune situation</label></div></fieldset>
+<div class="info-card">
+<fieldset><legend>Avez-vous actuellement besoin d'une aide pour vous déplacer ?</legend>
+<div class="options">
+<div class="opt" data-radio="aidNeeded">Non</div>
+<div class="opt" data-radio="aidNeeded">Oui</div>
+</div></fieldset>
+<div hidden="" id="aidDetails">
+<div class="field">
+<label>Si oui, quelle aide utilisez-vous ?</label>
+<select id="aidSelect">
+<option value="">Choisissez…</option>
+<option>Canne</option>
+<option>Déambulateur</option>
+<option>Fauteuil roulant</option>
+<option>Autre</option>
+</select>
+</div>
+<div hidden="" id="aidOther">
+<div class="field"><label>Précisez</label><input class="input" id="aidOtherText"/></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="profile-step" id="p3">
+<h3>Votre mode de vie</h3>
+<fieldset class="frequency-group">
+<legend>Pratiquez-vous actuellement une activité physique ou sportive de façon régulière ? <span class="required-mark">*</span></legend>
+<div class="options">
+<div class="opt" data-radio="sportRegular">Oui</div>
+<div class="opt" data-radio="sportRegular">Non</div>
+</div>
+</fieldset>
+<div hidden="" id="sportDetails">
+<fieldset class="frequency-group">
+<legend>Quelle(s) activité(s) physique(s) ou sportive(s) pratiquez-vous ? <span class="required-mark">*</span></legend>
+<div class="grid">
+<label class="check"><input name="sportType" type="checkbox" value="Marche"/> 🚶 Marche</label>
+<label class="check"><input name="sportType" type="checkbox" value="Vélo"/> 🚲 Vélo</label>
+<label class="check"><input name="sportType" type="checkbox" value="Natation"/> 🏊 Natation</label>
+<label class="check"><input name="sportType" type="checkbox" value="Course"/> 🏃 Course</label>
+<label class="check"><input name="sportType" type="checkbox" value="Renforcement / gymnastique"/> Renforcement / gymnastique</label>
+<label class="check"><input name="sportType" type="checkbox" value="Randonnée"/> 🥾 Randonnée</label>
+<label class="check"><input name="sportType" type="checkbox" value="Sport collectif / raquette"/> Sport collectif / raquette</label>
+<label class="check"><input name="sportType" type="checkbox" value="Autre activité"/> Autre activité</label>
+</div>
+</fieldset>
+<fieldset class="frequency-group">
+<legend>À quelle fréquence pratiquez-vous ces activités ? <span class="required-mark">*</span></legend>
+<div class="grid">
+<div class="field">
+<label>Nombre de séances par semaine
+<input class="input" id="sportSessions" inputmode="numeric" max="30" min="1" placeholder="Ex. 3" step="1" type="number"/>
+</label>
+</div>
+<div class="field">
+<label>Durée moyenne d'une séance
+<select id="sportDuration">
+<option value="">Choisissez…</option>
+<option value="15">Moins de 30 min</option>
+<option value="30">30 min</option>
+<option value="45">45 min</option>
+<option value="60">1 h</option>
+<option value="90">1 h 30</option>
+<option value="120">2 h</option>
+<option value="150">Plus de 2 h</option>
+</select>
+</label>
+</div>
+</div>
+<p class="small muted">Nous remplaçons les notions vagues « régulièrement » ou « très régulièrement » par une fréquence et une durée concrètes.</p>
+<div class="info-card" id="sportWeeklyVolume">Volume hebdomadaire estimé : —</div>
+</fieldset>
+</div>
+<fieldset class="frequency-group">
+<legend>Faites-vous régulièrement des déplacements à pied ou à vélo dans votre quotidien ?</legend>
+<div class="options">
+<div class="opt" data-radio="activeTravel">Oui</div>
+<div class="opt" data-radio="activeTravel">Non</div>
+</div>
+</fieldset>
+<div hidden="" id="activeTravelDetails">
+<fieldset class="frequency-group">
+<legend>Comment se font ces déplacements ?</legend>
+<div class="grid">
+<label class="check"><input name="outsideMode" type="checkbox" value="À pied"/> 🚶 À pied</label>
+<label class="check"><input name="outsideMode" type="checkbox" value="À vélo"/> 🚲 À vélo</label>
+</div>
+</fieldset>
+<fieldset class="frequency-group">
+<legend>En moyenne, combien de temps par jour ?</legend>
+<div class="grid">
+<label class="check"><input name="outsideDuration" type="radio" value="Moins de 30 minutes"/> Moins de 30 min</label>
+<label class="check"><input name="outsideDuration" type="radio" value="30 min à 1 heure"/> 30 min à 1 heure</label>
+<label class="check"><input name="outsideDuration" type="radio" value="Plus d'1 heure"/> Plus d'1 heure</label>
+<label class="check"><input name="outsideDuration" type="radio" value="Plus de 2 heures"/> Plus de 2 heures</label>
+</div>
+</fieldset>
+</div>
+<div class="field">
+<label>Qu'aimeriez-vous absolument continuer à pouvoir faire chez vous ?
+<textarea id="futureActivities" placeholder="Ex. cuisiner, recevoir des amis, jardiner, bricoler, monter à l'étage…" rows="4"></textarea>
+</label>
+</div>
+</div>
+<div class="profile-step" id="homeHelp">
+<h3>Aide à domicile</h3>
+<fieldset>
+<legend>Bénéficiez-vous actuellement d'une aide à domicile ?</legend>
+<div class="options">
+<div class="opt" data-radio="homeHelpNeeded">Non</div>
+<div class="opt" data-radio="homeHelpNeeded">Oui</div>
+</div>
+</fieldset>
+<div hidden="" id="homeHelpDetails">
+<fieldset>
+<legend>Qui intervient à votre domicile ?</legend>
+<p class="small muted">Plusieurs réponses possibles.</p>
+<div class="grid">
+<label class="check"><input name="homeHelpProvider" type="checkbox" value="Famille"/>Famille</label>
+<label class="check"><input name="homeHelpProvider" type="checkbox" value="Entreprise d'aide à la personne"/>Entreprise d'aide à la personne</label>
+<label class="check"><input name="homeHelpProvider" type="checkbox" value="Autre"/>Autre</label>
+</div>
+<div hidden="" id="homeHelpProviderOther">
+<div class="field"><label>Précisez :</label><input class="input" id="homeHelpProviderOtherText"/></div>
+</div>
+</fieldset>
+<fieldset>
+<legend>À quelle fréquence bénéficiez-vous de cette aide ?</legend>
+<div class="options">
+<div class="opt" data-radio="homeHelpFrequency">Tous les jours</div>
+<div class="opt" data-radio="homeHelpFrequency">2 à 4 fois par semaine</div>
+<div class="opt" data-radio="homeHelpFrequency">Moins d'une fois par semaine</div>
+</div>
+</fieldset>
+<fieldset>
+<legend>Pour quelles interventions ?</legend>
+<p class="small muted">Plusieurs réponses possibles.</p>
+<div class="grid">
+<label class="check"><input name="homeHelpTask" type="checkbox" value="Ménage"/>Ménage</label>
+<label class="check"><input name="homeHelpTask" type="checkbox" value="Cuisine"/>Cuisine</label>
+<label class="check"><input name="homeHelpTask" type="checkbox" value="Aide au change"/>Aide au change</label>
+<label class="check"><input name="homeHelpTask" type="checkbox" value="Toilettes"/>Aide aux toilettes</label>
+<label class="check"><input name="homeHelpTask" type="checkbox" value="Autre"/>Autre</label>
+</div>
+<div hidden="" id="homeHelpTaskOther">
+<div class="field"><label>Précisez :</label><input class="input" id="homeHelpTaskOtherText"/></div>
+</div>
+</fieldset>
+</div>
+</div>
+<div class="profile-step" id="p4">
+<h3>Votre perception du logement</h3>
+<fieldset>
+<legend>Comment vous sentez-vous dans votre logement aujourd'hui ?</legend>
+<div class="options">
+<div class="opt" data-radio="homeFeeling">Très à l'aise</div>
+<div class="opt" data-radio="homeFeeling">À l'aise</div>
+<div class="opt" data-radio="homeFeeling">Parfois contraint(e)</div>
+<div class="opt" data-radio="homeFeeling">Souvent contraint(e)</div>
+</div>
+</fieldset>
+<fieldset>
+<legend>Y a-t-il déjà un endroit de votre logement que vous trouvez moins pratique ? <span class="required-mark">*</span></legend>
+<div class="options">
+<div class="opt" data-radio="lessPractical">Non</div>
+<div class="opt" data-radio="lessPractical">Oui</div>
+</div>
+</fieldset>
+<div hidden="" id="lessPracticalDetails">
+<fieldset>
+<legend>Le ou lesquels ? <span class="required-mark">*</span></legend>
+<div class="grid">
+<label class="check"><input name="lessPracticalRoom" type="checkbox" value="Cuisine"/>Cuisine</label>
+<label class="check"><input name="lessPracticalRoom" type="checkbox" value="Salon / séjour"/>Salon / séjour</label>
+<label class="check"><input name="lessPracticalRoom" type="checkbox" value="Salle de bains"/>Salle de bains</label>
+<label class="check"><input name="lessPracticalRoom" type="checkbox" value="WC"/>WC</label>
+<label class="check"><input name="lessPracticalRoom" type="checkbox" value="Chambre"/>Chambre</label>
+<label class="check"><input name="lessPracticalRoom" type="checkbox" value="Escaliers / circulation"/>Escaliers / circulation</label>
+<label class="check"><input name="lessPracticalRoom" type="checkbox" value="Extérieur"/>Extérieur</label>
+</div>
+</fieldset>
+</div>
+</div>
+<div class="profile-step" id="p5">
+<h3>Les caractéristiques du logement</h3>
+<div class="field"><label>Votre logement est :</label><select id="homeType"><option value="">Choisissez…</option><option>Appartement</option><option>Maison</option><option>Autre</option></select></div>
+<div class="field"><label>Quelle est la surface approximative de votre logement ?</label><select id="surface"><option value="">Choisissez…</option><option>Moins de 50 m²</option><option>50 à 79 m²</option><option>80 à 99 m²</option><option>100 à 149 m²</option><option>150 m² ou plus</option><option>Je ne sais pas</option></select></div>
+<div class="field"><label>Combien de pièces principales compte votre logement ?</label><select id="rooms"><option value="">Choisissez…</option><option>1 pièce</option><option>2 pièces</option><option>3 pièces</option><option>4 pièces</option><option>5 pièces</option><option>6 pièces ou plus</option></select></div>
+<div class="field"><label>Combien de chambres compte votre logement ?</label><select id="bedrooms"><option value="">Choisissez…</option><option>Aucune</option><option>1</option><option>2</option><option>3</option><option>4 ou plus</option></select></div>
+<div class="field"><label>Combien de niveaux utilisez-vous au quotidien ?</label><select id="levels"><option value="">Choisissez…</option><option>Un seul niveau</option><option>Deux niveaux</option><option>Trois niveaux ou plus</option></select></div>
+<div class="field"><label>Votre logement a-t-il un extérieur ?</label><select id="exterior"><option value="">Choisissez…</option><option>Non</option><option>Oui</option></select></div>
+<div hidden="" id="exteriorDetails">
+<fieldset>
+<legend>Quel(s) type(s) d'extérieur ?</legend>
+<p class="small muted">Plusieurs réponses possibles.</p>
+<div class="grid">
+<label class="check"><input name="exteriorType" type="checkbox" value="Balcon"/>Balcon</label>
+<label class="check"><input name="exteriorType" type="checkbox" value="Terrasse"/>Terrasse</label>
+<label class="check"><input name="exteriorType" type="checkbox" value="Jardin"/>Jardin</label>
+<label class="check"><input name="exteriorType" type="checkbox" value="Autre"/>Autre</label>
+</div>
+</fieldset>
+<div hidden="" id="gardenDetails">
+<fieldset>
+<legend>Si vous avez un jardin, l'entretenez-vous vous-même ?</legend>
+<div class="options">
+<div class="opt" data-radio="gardenMaintenance">Oui</div>
+<div class="opt" data-radio="gardenMaintenance">Non</div>
+<div class="opt" data-radio="gardenMaintenance">En partie</div>
+</div>
+</fieldset>
+</div>
+</div>
+<div hidden="" id="aptBox"><div class="field"><label>À quel étage se situe votre appartement ?</label><select id="floor"><option value="">Choisissez…</option><option>Rez-de-chaussée</option><option>1er étage</option><option>2e étage</option><option>3e étage ou plus</option></select></div><div class="field"><label>Y a-t-il un ascenseur ?</label><select id="elevator"><option value="">Choisissez…</option><option>Oui</option><option>Non</option></select></div></div>
+<div class="field"><label>Votre logement comporte-t-il des escaliers intérieurs ?</label><select id="stairs"><option value="">Choisissez…</option><option>Oui</option><option>Non</option></select></div>
+<div class="field"><label>Comment ouvrez-vous principalement vos volets ?</label><select id="shutters"><option value="">Choisissez…</option><option>Volets roulants électriques</option><option>Volets roulants manuels</option><option>Volets battants</option><option>Autre</option></select></div>
+<div class="field"><label>L'ouverture des volets est-elle parfois difficile ?</label><select id="shutterDifficulty"><option value="">Choisissez…</option><option>Oui</option><option>Non</option></select></div>
+</div>
+<div class="profile-step" id="p6">
+<h3>Accès et sécurité</h3>
+<div class="field"><label>Quel est le type de votre porte d'entrée principale ?</label><select id="doorType"><option value="">Choisissez…</option><option>Porte classique</option><option>Porte blindée</option><option>Porte vitrée</option><option>Autre</option><option>Je ne sais pas</option></select></div>
+<fieldset><legend>Quels équipements de sécurité ou d'accès avez-vous ?</legend><div class="grid"><label class="check"><input name="security" type="checkbox" value="Judas"/>Judas</label><label class="check"><input name="security" type="checkbox" value="Visiophone"/>Visiophone</label><label class="check"><input name="security" type="checkbox" value="Vigik"/>Vigik / badge d'accès</label><label class="check"><input name="security" type="checkbox" value="Alarme"/>Alarme</label><label class="check"><input name="security" type="checkbox" value="Serrure multipoints"/>Serrure multipoints</label><label class="check"><input name="security" type="checkbox" value="Serrure connectée"/>Serrure électronique / connectée</label></div></fieldset>
+<fieldset><legend>Avez-vous un détecteur de fumée dans votre logement ?</legend><div class="options"><div class="opt">Oui</div><div class="opt">Non</div><div class="opt">Je ne sais pas</div></div></fieldset>
+<div class="field"><label>Vous sentez-vous en sécurité dans votre logement ?</label><select id="securityFeeling"><option value="">Choisissez…</option><option>Oui</option><option>Non</option><option>Parfois</option></select></div>
+</div>
+<div class="profile-step" id="p7">
+<h3>Confort thermique</h3>
+<fieldset>
+<legend>Quel(s) type(s) de chauffage possédez-vous ?</legend>
+<div class="hint">Plusieurs réponses possibles.</div>
+<div class="grid">
+<label class="check"><input name="heating" type="checkbox" value="Électrique individuel"/>Électrique individuel</label>
+<label class="check"><input name="heating" type="checkbox" value="Chaudière individuelle au gaz"/>Chaudière individuelle au gaz</label>
+<label class="check"><input name="heating" type="checkbox" value="Pompe à chaleur réversible"/>Pompe à chaleur réversible<br/><small>(chaud et froid)</small></label>
+<label class="check"><input name="heating" type="checkbox" value="Bois"/>Bois</label>
+<label class="check"><input name="heating" type="checkbox" value="Autre"/>Autre</label>
+<label class="check"><input name="heating" type="checkbox" value="Je ne sais pas"/>Je ne sais pas</label>
+</div>
+</fieldset>
+<div hidden="" id="woodHeatingDetails">
+<fieldset>
+<legend>Si vous utilisez du bois, quel type d'installation avez-vous ?</legend>
+<div class="hint">Plusieurs réponses possibles.</div>
+<div class="grid">
+<label class="check"><input name="woodType" type="checkbox" value="Cheminée"/>Cheminée</label>
+<label class="check"><input name="woodType" type="checkbox" value="Insert"/>Insert</label>
+</div>
+</fieldset>
+</div>
+<div hidden="" id="coDetectorDetails">
+<div class="field"><label>Avez-vous un détecteur-avertisseur autonome de monoxyde de carbone (DAACO) ?</label><select id="coDetector"><option value="">Choisissez…</option><option>Oui</option><option>Non</option><option>Je ne sais pas</option></select></div>
+</div>
+<div hidden="" id="boilerControlDetails">
+<div class="field"><label>Une entreprise effectue-t-elle régulièrement le contrôle ou l'entretien de votre chaudière individuelle ?</label>
+<select id="boilerControl"><option value="">Choisissez…</option><option>Oui</option><option>Non</option><option>Je ne sais pas</option></select></div>
+</div>
+<div class="field"><label>Souffrez-vous régulièrement de la chaleur ou du froid dans votre logement ?</label><select id="thermal"><option value="">Choisissez…</option><option>Non</option><option>Oui, surtout de la chaleur</option><option>Oui, surtout du froid</option><option>Oui, des deux</option></select></div>
+</div>
+<div class="profile-step" id="p8">
+<h3>Accidents et anticipation</h3>
+<div class="field"><label>Avez-vous eu un accident ou une situation marquante dans votre logement au cours des 3 dernières années ?</label><select id="accident"><option value="">Choisissez…</option><option>Non</option><option>Oui</option></select></div>
+<div hidden="" id="accidentDetails">
+<fieldset>
+<legend>De quel type ?</legend>
+<div class="grid">
+<label class="check"><input name="accidentType" type="checkbox" value="Chute"/>Chute</label>
+<label class="check"><input name="accidentType" type="checkbox" value="Coupure"/>Coupure</label>
+<label class="check"><input name="accidentType" type="checkbox" value="Brûlure"/>Brûlure</label>
+<label class="check"><input name="accidentType" type="checkbox" value="Étouffement"/>Étouffement</label>
+<label class="check"><input name="accidentType" type="checkbox" value="Autre"/>Autre</label>
+</div>
+</fieldset>
+<fieldset>
+<legend>Combien de fois cela vous est-il arrivé au cours des 3 dernières années ?</legend>
+<div class="options">
+<div class="opt" data-radio="accidentFrequency">1 fois</div>
+<div class="opt" data-radio="accidentFrequency">2 fois</div>
+<div class="opt" data-radio="accidentFrequency">3 fois</div>
+<div class="opt" data-radio="accidentFrequency">4 fois ou plus</div>
+</div>
+</fieldset>
+<fieldset>
+<legend>Cela a-t-il entraîné une hospitalisation ou une immobilisation prolongée ?</legend>
+<div class="options">
+<div class="opt" data-radio="accidentSeverity">Non</div>
+<div class="opt" data-radio="accidentSeverity">Oui</div>
+</div>
+</fieldset>
+<div hidden="" id="accidentSeverityDetails">
+<div class="field">
+<label>Si oui, quelle conséquence principale ?</label>
+<select id="accidentConsequence">
+<option value="">Choisissez…</option>
+<option>Hospitalisation</option>
+<option>Immobilisation prolongée</option>
+<option>Hospitalisation et immobilisation prolongée</option>
+</select>
+</div>
+</div>
+<fieldset>
+<legend>Dans quelle(s) pièce(s) cela s'est-il produit ?</legend>
+<p class="small muted">Plusieurs réponses possibles.</p>
+<div class="grid">
+<label class="check"><input name="accidentRoom" type="checkbox" value="Cuisine"/>Cuisine</label>
+<label class="check"><input name="accidentRoom" type="checkbox" value="Salle de bains"/>Salle de bains</label>
+<label class="check"><input name="accidentRoom" type="checkbox" value="WC"/>WC</label>
+<label class="check"><input name="accidentRoom" type="checkbox" value="Chambre"/>Chambre</label>
+<label class="check"><input name="accidentRoom" type="checkbox" value="Salon / séjour"/>Salon / séjour</label>
+<label class="check"><input name="accidentRoom" type="checkbox" value="Escaliers / circulation"/>Escaliers / circulation</label>
+<label class="check"><input name="accidentRoom" type="checkbox" value="Extérieur"/>Extérieur</label>
+<label class="check"><input name="accidentRoom" type="checkbox" value="Autre"/>Autre</label>
+</div>
+<div hidden="" id="accidentRoomOther">
+<div class="field"><label>Précisez :</label><input class="input" id="accidentRoomOtherText"/></div>
+</div>
+</fieldset>
+</div>
+<div class="field"><label>Combien de temps souhaitez-vous pouvoir rester dans ce logement ?</label><select id="stay"><option value="">Choisissez…</option><option>Je ne sais pas encore</option><option>Quelques années</option><option>5 à 10 ans</option><option>10 à 15 ans</option><option>Plus de 15 ans</option></select></div>
+<fieldset>
+<legend>Quels sont vos objectifs pour votre logement ?</legend>
+<p class="small muted">Plusieurs réponses possibles.</p>
+<div class="grid">
+<label class="check"><input name="objective" type="checkbox" value="Sécurité"/>Sécurité</label>
+<label class="check"><input name="objective" type="checkbox" value="Confort"/>Confort</label>
+<label class="check"><input name="objective" type="checkbox" value="Préparer l'avenir"/>Préparer l'avenir</label>
+</div>
+</fieldset>
+</div>
+<div class="profile-actions"><button class="secondary" disabled="" id="profilePrev" type="button">Retour</button><button id="profileNext" type="button">Continuer</button></div>
+<div class="small muted" id="profileCount">1 / 9</div>
+</section>
+<!-- CUISINE -->
+<section class="screen" id="kitchen1"><div class="eyebrow">ÉTAPE 2 · VOTRE CUISINE</div><h2>Votre usage de la cuisine</h2><fieldset><legend>Prenez-vous habituellement vos repas dans la cuisine ?</legend><div class="options"><div class="opt">Oui, régulièrement</div><div class="opt">Oui, occasionnellement</div><div class="opt">Non</div></div></fieldset><div class="field"><label>Combien de temps passez-vous généralement dans la cuisine lors d'une journée habituelle ?</label><select><option>Moins de 30 min</option><option>30 min à 1 heure</option><option>1 à 2 heures</option><option>Plus de 2 heures</option></select></div><div class="actions"><button class="secondary" onclick="prev()" type="button">Retour</button><span></span><button onclick="next()">Continuer</button></div></section>
+<section class="screen" id="kitchen2"><h2>Les équipements de votre cuisine</h2>
+<fieldset>
+<legend>Quels équipements utilisez-vous régulièrement ?</legend>
+<div class="grid">
+<label class="check"><input type="checkbox"/>Four</label>
+<label class="check"><input type="checkbox"/>Micro-ondes</label>
+<label class="check"><input type="checkbox"/>Lave-vaisselle</label>
+<label class="check"><input type="checkbox"/>Réfrigérateur / congélateur</label>
+<label class="check"><input type="checkbox"/>Évier</label>
+<label class="check"><input type="checkbox"/>Plaque de cuisson</label>
+</div>
+</fieldset>
+<div class="actions"><button class="secondary" onclick="prev()">Retour</button><button onclick="next()">Continuer</button></div></section>
+<section class="screen" id="kitchen3"><h2>Mode de cuisson et sécurité</h2>
+<fieldset>
+<legend>Quel type de cuisson utilisez-vous ?</legend>
+<p class="small muted">Plusieurs réponses possibles si vous utilisez plusieurs modes.</p>
+<div class="options multiselect" id="cookingOptions">
+<div class="opt">Gaz</div>
+<div class="opt">Électrique</div>
+<div class="opt">Induction</div>
+<div class="opt">Autre</div>
+</div>
+</fieldset>
+<div hidden="" id="gasSafety">
+<fieldset>
+<legend>Votre installation au gaz dispose-t-elle d'un dispositif de détection de fuite de gaz ?</legend>
+<div class="options">
+<div class="opt">Oui</div>
+<div class="opt">Non</div>
+<div class="opt">Je ne sais pas</div>
+</div>
+</fieldset>
+<fieldset>
+<legend>La coupure du gaz est-elle automatique en cas de problème ou d'oubli ?</legend>
+<div class="options">
+<div class="opt">Oui</div>
+<div class="opt">Non</div>
+<div class="opt">Je ne sais pas</div>
+</div>
+</fieldset>
+</div>
+<div class="actions"><button class="secondary" onclick="prev()">Retour</button><button onclick="next()">Continuer</button></div></section>
+<section class="screen" id="kitchen4"><h2>Qu'est-ce qui vous gêne réellement aujourd'hui ?</h2><p class="muted">Plusieurs réponses possibles.</p><div class="grid"><label class="check"><input type="checkbox"/>Utiliser les meubles bas</label><label class="check"><input type="checkbox"/>Me pencher, m'accroupir ou me relever</label><label class="check"><input type="checkbox"/>Utiliser les meubles hauts</label><label class="check"><input type="checkbox"/>Rester debout ou travailler longtemps</label><label class="check"><input type="checkbox"/>Utiliser certains équipements</label><label class="check"><input type="checkbox"/>Circuler ou me déplacer</label><label class="check"><input type="checkbox"/>M'asseoir ou me relever pour manger</label><label class="check"><input type="checkbox"/>Aucune difficulté particulière</label></div><div class="actions"><button class="secondary" onclick="prev()">Retour</button><button onclick="next()">Continuer</button></div></section>
+<section class="screen" id="kitchen5"><h2>Quels équipements vous gênent ?</h2><div class="grid"><label class="check"><input type="checkbox"/>Micro-ondes</label><label class="check"><input type="checkbox"/>Four</label><label class="check"><input type="checkbox"/>Évier</label><label class="check"><input type="checkbox"/>Lave-vaisselle</label><label class="check"><input type="checkbox"/>Plaque de cuisson</label><label class="check"><input type="checkbox"/>Réfrigérateur / congélateur</label><label class="check"><input type="checkbox"/>Prises électriques</label><label class="check"><input type="checkbox"/>Autre équipement</label></div><div class="actions"><button class="secondary" onclick="prev()">Retour</button><button onclick="next()">Continuer</button></div></section>
+<section class="screen" id="kitchen6"><h2>À quelle fréquence cette difficulté apparaît-elle ?</h2><div class="options"><div class="opt">Parfois</div><div class="opt">Souvent</div><div class="opt">Très souvent</div></div><div class="actions"><button class="secondary" onclick="prev()">Retour</button><button onclick="next()">Continuer</button></div></section>
+<!-- VIDEO -->
+<section class="screen" id="videoIntro"><div class="eyebrow">ÉTAPE 3 · VIDÉO</div><h2>Filmons votre cuisine ensemble</h2><p class="muted">Vous pourrez revoir chaque séquence avant de la valider. Chaque séquence est limitée à 30 secondes.</p><div class="info-card" id="cameraStatus">Caméra non démarrée. Pour utiliser la caméra sur iPhone, ouvrez le prototype depuis un lien HTTPS (par exemple GitHub Pages) et autorisez l’accès à la caméra.</div><div class="actions"><button class="secondary" onclick="prev()" type="button">Retour</button><button onclick="startCamera()">Autoriser la caméra</button><button class="secondary" onclick="next()">Continuer sans caméra</button></div></section>
+<section class="screen" id="videoGeneral">
+<h2>1. Vue générale</h2><p class="muted">Filmez lentement l'ensemble de la cuisine : meubles, plan de travail, cuisson, évier et circulation.</p>
+<div class="camera"><video autoplay="" id="cam" muted="" playsinline=""></video></div>
+<div class="timer" id="timer1">00:30</div>
+<div class="actions">
+<button class="secondary" onclick="prev()" type="button">Retour</button>
+<button id="recordBtn1" onclick="recordVideo(1)" type="button">● Enregistrer 30 s</button>
+<button id="stopBtn1" class="secondary" onclick="stopRecording()" type="button" hidden="" disabled="">■ Arrêter</button>
+<button class="secondary" onclick="next()" type="button">Passer</button>
+</div>
+<div id="review1" class="info-card" hidden="">Séquence enregistrée. Vous pouvez la visionner puis la valider.</div>
+<div id="previewWrap1" hidden=""><video id="preview1" controls playsinline style="width:100%;max-height:420px;border-radius:12px;"></video></div>
+<div class="actions"><button id="validate1" disabled="" onclick="validateRecording(1)" type="button">Valider la vidéo</button></div>
+</section><section class="screen" id="videoWork">
+<h2>2. Montrez les zones que vous utilisez le plus</h2><p class="muted">Montrez les rangements, la zone de cuisson et les gestes qui vous semblent importants.</p>
+<div class="camera"><video autoplay="" id="cam2" muted="" playsinline=""></video></div>
+<div class="timer" id="timer2">00:30</div>
+<div class="actions">
+<button class="secondary" onclick="prev()" type="button">Retour</button>
+<button id="recordBtn2" onclick="recordVideo(2)" type="button">● Enregistrer 30 s</button>
+<button id="stopBtn2" class="secondary" onclick="stopRecording()" type="button" hidden="" disabled="">■ Arrêter</button>
+<button class="secondary" onclick="next()" type="button">Passer</button>
+</div>
+<div id="review2" class="info-card" hidden="">Séquence enregistrée. Vous pouvez la visionner puis la valider.</div>
+<div id="previewWrap2" hidden=""><video id="preview2" controls playsinline style="width:100%;max-height:420px;border-radius:12px;"></video></div>
+<div class="actions"><button id="validate2" disabled="" onclick="validateRecording(2)" type="button">Valider la vidéo</button></div>
+</section><section class="screen" id="videoFree">
+<h2>3. Quelque chose d'autre à nous montrer ?</h2><p class="muted">Séquence facultative.</p>
+<div class="camera"><video autoplay="" id="cam3" muted="" playsinline=""></video></div>
+<div class="timer" id="timer3">00:30</div>
+<div class="actions">
+<button class="secondary" onclick="prev()" type="button">Retour</button>
+<button id="recordBtn3" onclick="recordVideo(3)" type="button">● Enregistrer 30 s</button>
+<button id="stopBtn3" class="secondary" onclick="stopRecording()" type="button" hidden="" disabled="">■ Arrêter</button>
+<button class="secondary" onclick="next()" type="button">Passer cette étape</button>
+</div>
+<div id="review3" class="info-card" hidden="">Séquence enregistrée. Vous pouvez la visionner puis la valider.</div>
+<div id="previewWrap3" hidden=""><video id="preview3" controls playsinline style="width:100%;max-height:420px;border-radius:12px;"></video></div>
+<div class="actions"><button id="validate3" disabled="" onclick="validateRecording(3)" type="button">Valider la vidéo</button></div>
+</section><section class="screen" id="videoComplete"><h2>Vos vidéos sont prêtes</h2><div class="info-card">Les séquences validées sont prêtes pour l'analyse. Dans cette version, l'analyse est un prototype.</div><div class="actions"><button class="secondary" onclick="prev()" type="button">Retour</button><span></span><button onclick="next()">Lancer l'analyse</button></div></section>
+<section class="screen" id="analysis"><div class="eyebrow">ÉTAPE 4 · ANALYSE</div><h2>Analyse croisée</h2><p class="muted">Nous croisons vos réponses, votre mobilité et les séquences vidéo validées.</p><div class="result-card">✓ Vos usages</div><div class="result-card">✓ Vos difficultés</div><div class="result-card">✓ Votre environnement</div><div class="result-card">✓ Vos priorités</div><div class="info-card">Une image ne suffit pas à conclure qu'une situation est dangereuse : les points sont à vérifier.</div><div class="actions"><button class="secondary" onclick="prev()">Retour</button><button onclick="next()">Voir mes résultats</button></div></section>
+<section class="screen" id="results"><h2>Votre cuisine aujourd'hui</h2><div class="result-card">🟢 <strong>Ce qui fonctionne bien</strong><p>Les éléments sans difficulté déclarée sont conservés.</p></div><div class="result-card">🔵 <strong>Améliorations possibles</strong><p>Certains rangements ou équipements peuvent être réorganisés.</p></div><div class="result-card">🟠 <strong>À anticiper</strong><p>Des adaptations peuvent être préparées progressivement.</p></div><div class="result-card">🔴 <strong>Points prioritaires</strong><p>Les éléments les plus gênants pour vous sont présentés en premier.</p></div><div class="actions"><button class="secondary" onclick="prev()">Retour</button><button onclick="next()">Découvrir mes recommandations</button></div></section>
+<section class="screen" id="recommendations"><h2>Vos recommandations personnalisées</h2><p class="muted">Les recommandations sont hiérarchisées selon votre profil et vos réponses.</p><div class="result-card" id="reco"></div><div class="actions"><button class="secondary" onclick="prev()">Retour</button><button onclick="next()">Voir mon plan d'action</button></div></section>
+<section class="screen" id="action"><h2>Votre plan d'action</h2><div class="result-card"><strong>1 · Réorganiser</strong><p>Action simple, sans travaux importants.</p></div><div class="result-card"><strong>2 · Adapter</strong><p>Une amélioration d'équipement peut être étudiée.</p></div><div class="result-card"><strong>3 · Anticiper</strong><p>À intégrer lors d'une prochaine évolution du logement.</p></div><div class="info-card"><strong>Vous décidez.</strong><p>Les recommandations sont des propositions.</p></div><div class="actions"><button class="secondary" onclick="prev()">Retour</button><button onclick="location.reload()">Recommencer</button></div></section>
+</div></div>
+<script>
+const screens=[...document.querySelectorAll('.screen')];let idx=0,profileIdx=1,stream=null,media=null,t=30;
+function bar(){document.getElementById('bar').style.width=((idx+1)/screens.length*100)+'%'}function show(n){screens[idx].classList.remove('active');idx=Math.max(0,Math.min(n,screens.length-1));screens[idx].classList.add('active');bar();scrollTo(0,0);if(idx===screens.length-2)buildReco()}
+function next(){show(idx+1)}function prev(){show(idx-1)}bar();
+function profShow(n){
+  const steps=[...document.querySelectorAll('.profile-step')];
+  if(n<1 || n>steps.length) return;
+  steps.forEach(x=>x.classList.remove('active'));
+  steps[n-1].classList.add('active');
+  profileIdx=n;
+  document.getElementById('profileCount').textContent=n+' / '+steps.length;
+  document.getElementById('profilePrev').disabled=n===1;
+  document.getElementById('profileNext').textContent='Continuer';
+}
+function profNext(){
+  const steps=[...document.querySelectorAll('.profile-step')];
+  const p=steps[profileIdx-1];
+  if(!p) return;
+  for(const e of p.querySelectorAll('select[required]')) if(!e.value){e.reportValidity();return}
+  if(profileIdx<steps.length) profShow(profileIdx+1);
+  else next();
+}
+document.getElementById('profileNext').onclick=profNext;document.getElementById('profilePrev').onclick=()=>{if(profileIdx>1)profShow(profileIdx-1)};
+document.getElementById('occupancy').onchange=e=>document.getElementById('occOther').hidden=e.target.value!=='Autre';
+document.querySelectorAll('[data-radio]').forEach(x=>x.onclick=()=>{document.querySelectorAll('[data-radio="'+x.dataset.radio+'"]').forEach(y=>y.classList.remove('selected'));x.classList.add('selected');if(x.dataset.radio==='difficulty')document.getElementById('mobDetails').hidden=x.textContent.trim()!=='Oui';if(x.dataset.radio==='aidNeeded')document.getElementById('aidDetails').hidden=x.textContent.trim()!=='Oui'});
+document.getElementById('aidSelect').onchange=e=>document.getElementById('aidOther').hidden=e.target.value!=='Autre';
+document.getElementById('homeType').onchange=e=>document.getElementById('aptBox').hidden=e.target.value!=='Appartement';
+document.getElementById('accident').onchange=e=>document.getElementById('accidentDetails').hidden=e.target.value!=='Oui';
+document.querySelectorAll('[data-radio="sportRegular"]').forEach(x=>x.onclick=()=>{
+  document.querySelectorAll('[data-radio="sportRegular"]').forEach(y=>y.classList.remove('selected'));
+  x.classList.add('selected');
+  document.getElementById('sportDetails').hidden=x.textContent.trim()!=='Oui';
+});
+document.querySelectorAll('[data-radio="activeTravel"]').forEach(x=>x.onclick=()=>{
+  document.querySelectorAll('[data-radio="activeTravel"]').forEach(y=>y.classList.remove('selected'));
+  x.classList.add('selected');
+  document.getElementById('activeTravelDetails').hidden=x.textContent.trim()!=='Oui';
+});
+function updateSportVolume(){
+  const n=parseFloat(document.getElementById('sportSessions').value)||0;
+  const d=parseFloat(document.getElementById('sportDuration').value)||0;
+  document.getElementById('sportWeeklyVolume').textContent =
+    n&&d ? 'Volume hebdomadaire estimé : '+(n*d)+' minutes' : 'Volume hebdomadaire estimé : —';
+}
+document.getElementById('sportSessions').addEventListener('input',updateSportVolume);
+document.getElementById('sportDuration').addEventListener('change',updateSportVolume);
+
+document.querySelectorAll('[data-radio="homeFeeling"]').forEach(x=>x.onclick=()=>{
+  document.querySelectorAll('[data-radio="homeFeeling"]').forEach(y=>y.classList.remove('selected'));
+  x.classList.add('selected');
+});
+document.querySelectorAll('[data-radio="lessPractical"]').forEach(x=>x.onclick=()=>{
+  document.querySelectorAll('[data-radio="lessPractical"]').forEach(y=>y.classList.remove('selected'));
+  x.classList.add('selected');
+  document.getElementById('lessPracticalDetails').hidden=x.textContent.trim()!=='Oui';
+});
+
+
+// Rendre toutes les grandes cartes de réponse réellement sélectionnables.
+// Par défaut : choix unique dans un groupe .options.
+// Exception : .options.multiselect = plusieurs choix possibles.
+document.querySelectorAll('.opt').forEach(card=>{
+  card.addEventListener('click', ()=>{
+    const group=card.parentElement;
+    if(group.classList.contains('multiselect')){
+      card.classList.toggle('selected');
+    }else{
+      group.querySelectorAll('.opt').forEach(x=>x.classList.remove('selected'));
+      card.classList.add('selected');
+    }
+  });
+});
+
+document.querySelectorAll('[data-radio="accidentSeverity"]').forEach(x=>x.onclick=()=>{
+  document.querySelectorAll('[data-radio="accidentSeverity"]').forEach(y=>y.classList.remove('selected'));
+  x.classList.add('selected');
+  document.getElementById('accidentSeverityDetails').hidden=x.textContent.trim()!=='Oui';
+});
+document.querySelectorAll('input[name="accidentRoom"]').forEach(x=>x.onchange=()=>{
+  const other=document.querySelector('input[name="accidentRoom"][value="Autre"]');
+  document.getElementById('accidentRoomOther').hidden=!other.checked;
+});
+
+document.querySelectorAll('[data-radio="homeHelpNeeded"]').forEach(x=>x.onclick=()=>{
+  document.querySelectorAll('[data-radio="homeHelpNeeded"]').forEach(y=>y.classList.remove('selected'));
+  x.classList.add('selected');
+  document.getElementById('homeHelpDetails').hidden=x.textContent.trim()!=='Oui';
+});
+document.querySelectorAll('input[name="homeHelpProvider"]').forEach(x=>x.onchange=()=>{
+  const other=document.querySelector('input[name="homeHelpProvider"][value="Autre"]');
+  document.getElementById('homeHelpProviderOther').hidden=!other.checked;
+});
+document.querySelectorAll('input[name="homeHelpTask"]').forEach(x=>x.onchange=()=>{
+  const other=document.querySelector('input[name="homeHelpTask"][value="Autre"]');
+  document.getElementById('homeHelpTaskOther').hidden=!other.checked;
+});
+
+const cityInput=document.getElementById('residenceCity');
+const citySuggestions=document.getElementById('citySuggestions');
+let cityTimer=null, cityAbort=null;
+
+function hideCities(){citySuggestions.hidden=true;citySuggestions.innerHTML='';}
+function showCities(items){
+  citySuggestions.innerHTML='';
+  if(!items.length){hideCities();return;}
+  items.forEach(city=>{
+    const codes=(city.codesPostaux||[]).filter(Boolean);
+    const unique=[...new Set(codes)];
+    const label=unique.length
+      ? `${city.nom} (${unique.join(' / ')})`
+      : city.nom;
+    const option=document.createElement('div');
+    option.className='city-option';
+    option.setAttribute('role','option');
+    option.textContent=label;
+    option.addEventListener('mousedown',e=>{
+      e.preventDefault();
+      cityInput.value=label;
+      cityInput.dataset.cityCode=city.code||'';
+      cityInput.dataset.cityName=city.nom||'';
+      citySuggestions.hidden=true;
+    });
+    citySuggestions.appendChild(option);
+  });
+  citySuggestions.hidden=false;
+}
+
+cityInput.addEventListener('input',()=>{
+  cityInput.dataset.cityCode='';
+  cityInput.dataset.cityName='';
+  clearTimeout(cityTimer);
+  const q=cityInput.value.trim();
+  if(q.length<3){hideCities();return;}
+  cityTimer=setTimeout(async()=>{
+    if(cityAbort) cityAbort.abort();
+    cityAbort=new AbortController();
+    try{
+      const url='https://geo.api.gouv.fr/communes?nom='+encodeURIComponent(q)+
+        '&fields=nom,code,codesPostaux&format=json&boost=population&limit=12';
+      const res=await fetch(url,{signal:cityAbort.signal});
+      if(!res.ok) throw new Error('API');
+      const data=await res.json();
+      showCities(data);
+    }catch(err){
+      if(err.name!=='AbortError') hideCities();
+    }
+  },220);
+});
+cityInput.addEventListener('blur',()=>setTimeout(hideCities,180));
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.residence-field')) hideCities();
+});
+const cookingOptions=document.getElementById('cookingOptions');
+if(cookingOptions){
+  cookingOptions.querySelectorAll('.opt').forEach(card=>card.addEventListener('click',()=>{
+    const gas=[...cookingOptions.querySelectorAll('.opt')].find(x=>x.textContent.trim()==='Gaz');
+    document.getElementById('gasSafety').hidden=!gas.classList.contains('selected');
+  }));
+}
+document.getElementById('exterior').addEventListener('change',e=>{
+  document.getElementById('exteriorDetails').hidden=e.target.value!=='Oui';
+});
+document.querySelectorAll('input[name="exteriorType"]').forEach(x=>x.onchange=()=>{
+  const garden=document.querySelector('input[name="exteriorType"][value="Jardin"]');
+  document.getElementById('gardenDetails').hidden=!garden.checked;
+});
+document.querySelectorAll('input[name="heating"]').forEach(x=>x.onchange=()=>{
+  const selected=[...document.querySelectorAll('input[name="heating"]:checked')].map(e=>e.value);
+  const individualBoiler=selected.includes('Chaudière individuelle au gaz');
+  const combustionHeating=individualBoiler || selected.includes('Bois');
+  document.getElementById('boilerControlDetails').hidden=!individualBoiler;
+  document.getElementById('coDetectorDetails').hidden=!combustionHeating;
+  document.getElementById('woodHeatingDetails').hidden=!selected.includes('Bois');
+});
+async function startCamera(){
+  const status=document.getElementById('cameraStatus');
+  const setStatus=(msg)=>{if(status)status.textContent=msg;};
+  if(!window.isSecureContext || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    setStatus("La caméra nécessite une connexion sécurisée HTTPS. Si vous avez ouvert le fichier directement sur l'ordinateur ou l'iPhone, ouvrez plutôt le lien GitHub Pages en HTTPS.");
+    return;
+  }
+  try{
+    if(stream){stream.getTracks().forEach(track=>track.stop());stream=null;}
+    stream=await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},
+      audio:false
+    });
+    ['cam','cam2','cam3'].forEach(id=>{
+      const v=document.getElementById(id);
+      if(v){
+        v.srcObject=stream;
+        v.setAttribute('autoplay','');
+        v.setAttribute('playsinline','');
+        v.muted=true;
+        const playPromise=v.play();
+        if(playPromise) playPromise.catch(()=>{});
+      }
+    });
+    setStatus('✓ Caméra activée');
+    next();
+  }catch(e){
+    console.error('Caméra:',e);
+    let msg="Caméra non accessible. Vérifiez l'autorisation de caméra dans le navigateur.";
+    if(e.name==='NotAllowedError' || e.name==='PermissionDeniedError')
+      msg="Accès à la caméra refusé. Autorisez la caméra pour ce site dans les réglages du navigateur puis réessayez.";
+    else if(e.name==='NotFoundError')
+      msg="Aucune caméra disponible sur cet appareil.";
+    else if(e.name==='NotReadableError')
+      msg="La caméra est déjà utilisée par une autre application. Fermez-la puis réessayez.";
+    setStatus(msg);
+  }
+}
+
+let activeRecorder=null, activeTimer=null, activeSequence=null, recordedBlobs={};
+function recordVideo(which){ startRecording(which); }
+function startRecording(which){
+  if(!stream){alert("Activez d'abord la caméra avant d'enregistrer.");return;}
+  if(!window.MediaRecorder){alert("L'enregistrement vidéo n'est pas pris en charge par ce navigateur. Essayez Chrome ou Safari à jour.");return;}
+  if(activeRecorder && activeRecorder.state==="recording"){return;}
+  const videoTrack=stream.getVideoTracks()[0];
+  if(!videoTrack || videoTrack.readyState!=="live"){alert("La caméra n'est pas active. Revenez à l'étape caméra et autorisez-la.");return;}
+  activeSequence=which;
+  const chunks=[];
+  let options={};
+  if(MediaRecorder.isTypeSupported("video/webm;codecs=vp8")) options={mimeType:"video/webm;codecs=vp8"};
+  else if(MediaRecorder.isTypeSupported("video/webm")) options={mimeType:"video/webm"};
+  try{activeRecorder=new MediaRecorder(stream,options);}
+  catch(e){alert("Impossible de démarrer l'enregistrement : "+e.message);return;}
+  const recBtn=document.getElementById("recordBtn"+which);
+  const stopBtn=document.getElementById("stopBtn"+which);
+  const validateBtn=document.getElementById("validate"+which);
+  const review=document.getElementById("review"+which);
+  const previewWrap=document.getElementById("previewWrap"+which);
+  recBtn.disabled=true; stopBtn.hidden=false; stopBtn.disabled=false;
+  validateBtn.disabled=true; review.hidden=true; previewWrap.hidden=true;
+  activeRecorder.ondataavailable=(event)=>{if(event.data && event.data.size>0)chunks.push(event.data);};
+  activeRecorder.onerror=(event)=>{console.error("MediaRecorder error",event);};
+  activeRecorder.onstop=()=>{
+    clearInterval(activeTimer); activeTimer=null;
+    const mime=activeRecorder.mimeType || "video/webm";
+    const blob=new Blob(chunks,{type:mime});
+    if(blob.size===0){
+      review.hidden=false;review.textContent="Aucune vidéo n'a été enregistrée. Vérifiez les autorisations puis recommencez.";
+      recBtn.disabled=false;stopBtn.hidden=true;stopBtn.disabled=true;return;
+    }
+    recordedBlobs[which]=blob;
+    const url=URL.createObjectURL(blob);
+    const preview=document.getElementById("preview"+which);
+    preview.src=url; previewWrap.hidden=false;
+    review.hidden=false;review.textContent="Enregistrement terminé. Regardez la vidéo ci-dessous, puis validez-la ou recommencez.";
+    validateBtn.disabled=false;recBtn.disabled=false;recBtn.textContent="↻ Recommencer";
+    stopBtn.hidden=true;stopBtn.disabled=true;
+    const timer=document.getElementById("timer"+which);if(timer)timer.textContent="00:00";
+  };
+  let remaining=30;
+  const timer=document.getElementById("timer"+which);
+  if(timer)timer.textContent="00:30";
+  activeRecorder.start(250);
+  activeTimer=setInterval(()=>{
+    remaining--;
+    if(timer)timer.textContent="00:"+String(Math.max(0,remaining)).padStart(2,"0");
+    if(remaining<=0)stopRecording();
+  },1000);
+}
+function stopRecording(){
+  if(activeRecorder && activeRecorder.state==="recording") activeRecorder.stop();
+}
+function validateRecording(which){
+  if(!recordedBlobs[which])return;
+  const btn=document.getElementById("validate"+which);
+  btn.textContent="✓ Vidéo validée";
+  btn.disabled=true;
+  const rec=document.getElementById("recordBtn"+which); if(rec)rec.disabled=true;
+
+  // Après validation, passer automatiquement à la séquence suivante.
+  // La troisième validation ouvre l'écran récapitulatif des vidéos.
+  if(which===1){
+    show(screens.findIndex(el=>el.id==="videoWork"));
+  }else if(which===2){
+    show(screens.findIndex(el=>el.id==="videoFree"));
+  }else if(which===3){
+    show(screens.findIndex(el=>el.id==="videoComplete"));
+  }
+}
+
+function buildReco(){let occ=document.getElementById('occupancy').value;let aid=document.getElementById('aidSelect').value;let txt='';if(aid)txt+='Votre besoin d’aide à la mobilité ('+aid+') doit être pris en compte dans les recommandations. ';if(occ==='Locataire')txt+='Votre statut de locataire conduit à privilégier d’abord les solutions réversibles ou soumises à accord. ';if(occ==='Propriétaire')txt+='Votre statut de propriétaire permet d’envisager aussi des adaptations plus durables. ';if(!txt)txt='Les recommandations seront hiérarchisées à partir de vos difficultés, de vos priorités et des éléments observés dans la cuisine.';document.getElementById('reco').textContent=txt}
+</script>
+
+<button id="quickTestBtn" type="button">⚡ Préremplir pour tester</button>
+<div id="quickTestNote">Préremplissage de test : réponses fictives, caméra non démarrée. Vous pourrez modifier les réponses.</div>
+<script>
+(function(){
+ const btn=document.getElementById('quickTestBtn'), note=document.getElementById('quickTestNote');
+ if(!btn) return;
+ btn.addEventListener('click',()=>{
+   note.style.display='block';
+   // Fill visible/hidden form controls with plausible sample answers.
+   const selects=[...document.querySelectorAll('select')];
+   selects.forEach(sel=>{
+     const opts=[...sel.options].filter(o=>o.value && !o.disabled);
+     if(opts.length){ sel.value=opts[Math.floor(Math.random()*opts.length)].value; sel.dispatchEvent(new Event('change',{bubbles:true})); }
+   });
+   document.querySelectorAll('input[type="text"],input[type="number"],textarea').forEach(el=>{
+     if(el.disabled) return;
+     if(/ville|résidence/i.test((el.id||'')+' '+(el.placeholder||''))) {
+       el.value='Paris (75056)';
+     } else if(el.type==='number') {
+       el.value=String(1+Math.floor(Math.random()*3));
+     } else if(!el.value) {
+       el.value='Réponse de test';
+     }
+     el.dispatchEvent(new Event('input',{bubbles:true}));
+     el.dispatchEvent(new Event('change',{bubbles:true}));
+   });
+   // Select a plausible "Oui" response and relevant checkboxes for conditional branches.
+   document.querySelectorAll('[data-radio]').forEach(el=>{
+     const group=el.dataset.radio;
+     if(['difficulty','accident','sportRegular','activeTravel','aidNeeded'].includes(group) && el.textContent.trim()==='Oui') el.click();
+   });
+   document.querySelectorAll('input[type="checkbox"]').forEach((el,i)=>{
+     if(i%3===0 && !el.checked){el.checked=true;el.dispatchEvent(new Event('change',{bubbles:true}));}
+   });
+   // Navigate to the first screen containing the equipment-discomfort question, if available.
+   const target=[...document.querySelectorAll('label,h2,h3,p,div')].find(el=>el.children.length===0 && /Quels équipements vous gênent/i.test(el.textContent||''));
+   if(target){
+     let section=target.closest('.screen,section');
+     if(section){
+       document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+       section.classList.add('active');
+       const screens=[...document.querySelectorAll('.screen')], i=screens.indexOf(section);
+       const bar=document.getElementById('bar');
+       if(bar && screens.length>1) bar.style.width=((i+1)/screens.length*100)+'%';
+       section.scrollIntoView({behavior:'smooth',block:'start'});
+     } else target.scrollIntoView({behavior:'smooth',block:'center'});
+   } else {
+     alert('Réponses de test préremplies. Poursuivez avec Continuer jusqu’à la question « Quels équipements vous gênent ? ».');
+   }
+ });
+})();
+</script>
+</body></html>
